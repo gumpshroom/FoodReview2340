@@ -20,7 +20,7 @@
             width: 40%;
         }
         body {
-            background-image: url("{% static 'images/skyline.png' %}");
+            background-image: url("{% static 'images/background.png' %}");
             background-size: 100%;
         }
         img {
@@ -36,7 +36,7 @@
 
 <body>
 <!img src="{% static 'images/skyline.png' %}" style="opacity: 0.1; " alt="">
-<nav class="top">
+<nav class="top pink2">
     <div class="max"></div>
   <a>
     <i>map</i>
@@ -51,9 +51,30 @@
 <main class="responsive">
 
     <div class="responsive small-height"></div>
-    <article class="responsive large-padding large-margin center" style="opacity:0.3">
+    <article class="responsive large-padding large-margin center pink1 large-round" style="opacity:0.3">
         <h2 class="center-align">Atlanta Food Finder</h2><br>
     <div class="center bottom field round suffix prefix small no-margin white black-text searchbar" id="search"><i class="">search</i><input type="text" placeholder=" " id="searchInput"></div>
+        <br>
+        <div class="center-align wrap large-width center">
+            <script>
+                function setSearchFromButton(button) {
+                    document.getElementById('searchInput').value = button.innerText;
+                }
+            </script>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Fast food</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">American</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Chinese</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Italian</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">American</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Mexican</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Indian</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Japanese</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Korean</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Thai</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Mediterranean</button>
+            <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Snacks</button>
+        </div>
+
     </article>
 </main>
 
