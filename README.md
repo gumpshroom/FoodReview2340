@@ -1,6 +1,6 @@
 This project is an Atlanta food finder.
 
-This project was done by Aaron Luu, Bao Nguyen, Nathan Nguyen, Eric Yang, and Patrick, Delrio for Georgia Tech's CS2340 course.
+This project was done by Aaron Luu, Bao Nguyen, Nathan Nguyen, Eric Yang, and Patrick, Del Rio for Georgia Tech's CS2340 course.
 
 The Objective:
 The goal of this project is to design and develop a web application using Django and Google Maps that helps citizens in Atlanta find places and restaurants to eat.
