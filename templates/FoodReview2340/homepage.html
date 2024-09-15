@@ -21,7 +21,8 @@
         }
         body {
             background-image: url("{% static 'images/background.png' %}");
-            background-size: 100%;
+            background-repeat: no-repeat;
+            background-size: cover;
         }
         img {
   pointer-events: none;
@@ -52,7 +53,11 @@
 
     <div class="responsive small-height"></div>
     <article class="responsive large-padding large-margin center pink1 large-round" style="opacity:0.3">
-        <h2 class="center-align">Atlanta Food Finder</h2><br>
+        <div class="grid">
+        <div class="s12 m6 l6 middle-align center-align">
+        <h2 class="center-align middle-align">Atlanta Food Finder</h2>
+        </div>
+        <div class="s12 m6 l6">
     <div class="center bottom field round suffix prefix small no-margin white black-text searchbar" id="search"><i class="">search</i><input type="text" placeholder=" " id="searchInput"></div>
         <br>
         <div class="center-align wrap large-width center">
@@ -74,7 +79,8 @@
             <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Mediterranean</button>
             <button class="chip round white tiny-margin" onclick="setSearchFromButton(this)">Snacks</button>
         </div>
-
+        </div>
+        </div>
     </article>
 </main>
 
