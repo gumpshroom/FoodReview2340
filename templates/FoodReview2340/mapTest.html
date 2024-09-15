@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Locations</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ&callback=initMap" async defer></script>
+
+    <script>
+        // Array of restaurant locations
+        const restaurants = [
+            { name: "Restaurant 1", position: { lat: 33.78461070014585, lng: -84.40568103373404 } }, // anticos
+            { name: "Restaurant 2", position: { lat: 33.77167370778494, lng: -84.38925808689659 } }, // varsity
+            { name: "Restaurant 3", position: { lat: 33.77884748538419, lng: -84.41004640173837} } // food terminal
+        ];
+
+        function initMap() {
+            // Create the map centered on Atlanta
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: { lat: 33.77831449138874, lng: -84.39914774185792 } // centered on GT
+            });
+
+            // Loop through restaurants array to place markers
+            restaurants.forEach(restaurant => {
+                const marker = new google.maps.Marker({
+                    position: restaurant.position,
+                    map: map,
+                    title: restaurant.name
+                });
+
+                // Optional: Add info windows for each marker
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<h3>${restaurant.name}</h3>`
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Restaurant Locations</h1>
+
+    <!-- Div to hold the Google Map -->
+    <div id="map" style="height: 400px; width: 100%;"></div>
+
+</body>
+</html>
