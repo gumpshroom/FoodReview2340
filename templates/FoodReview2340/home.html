@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .rectangle-top {
+            width: 40%;
+            height: 10%;
+            background-color: #FFCFCF; /* Pink background /
+            border: 2px solid #FFCFCF; / Pink border */
+            border-bottom-left-radius: 40px;
+            position: fixed;
+            top: 0;
+            right: 0;
+        }
+        .rectangle-bottom {
+            width: 30%;
+            height: 10%;
+            background-color: #FFCFCF;
+            border: 2px solid #FFCFCF;
+            border-top-right-radius: 40px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+        .rectangle-middle {
+            width: 40%;
+            height: 30%;
+            background-color: #FFCFCF;
+            border-radius: 80px;
+            position: absolute;
+            top:30%;
+            left:50%;
+        }
+        .website-name {
+            text-align: center;
+            color: black;
+            font-weight: 1000;
+            font-family: Arial, sans-serif;
+            font-size: 80px;
+            top:30%;
+            position:relative;
+        }
+        .search-bar {
+            margin:auto;
+            width:80%;
+            height:15%;
+            background-color:#DB8A8A;
+            border-radius:20px;
+            position:relative;
+            top:40%;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            border: 25px solid #FFCFCF;
+            background-image: url("{% static '../../../images/background.jpg' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="rectangle-top"></div>
+    <div class="rectangle-bottom"></div>
+    <div class="rectangle-middle">
+        <div class="website-name">Atlanta Food Finder</div>
+        <div class="search-bar"></div>
+    </div>
+</body>
+</html>
