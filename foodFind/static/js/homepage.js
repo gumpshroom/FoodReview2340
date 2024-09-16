@@ -11,7 +11,7 @@ document.getElementById(('search')).addEventListener('click', function() {
         targets: 'div#search',
         backgroundColor: '#FFF',
         duration: 500,
-        width: '70%',
+        width: '60%',
     });
     clicked = true
 })
