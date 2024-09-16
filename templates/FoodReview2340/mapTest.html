@@ -3,49 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Locations</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ&callback=initMap" async defer></script>
-
+    <title>Google Places API Example</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ
+    &libraries=places"></script>
     <script>
-        // Array of restaurant locations
-        const restaurants = [
-            { name: "Restaurant 1", position: { lat: 33.78461070014585, lng: -84.40568103373404 } }, // anticos
-            { name: "Restaurant 2", position: { lat: 33.77167370778494, lng: -84.38925808689659 } }, // varsity
-            { name: "Restaurant 3", position: { lat: 33.77884748538419, lng: -84.41004640173837} } // food terminal
-        ];
+        let map;
+        let currentInfoWindow = null;  // To track the currently open info window
 
         function initMap() {
-            // Create the map centered on Atlanta
-            const map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 13,
-                center: { lat: 33.77831449138874, lng: -84.39914774185792 } // centered on GT
+            const georgiaTech = { lat: 33.7756, lng: -84.3963 };
+
+            // Initialize the map
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: georgiaTech,
+                zoom: 15
             });
 
-            // Loop through restaurants array to place markers
-            restaurants.forEach(restaurant => {
-                const marker = new google.maps.Marker({
-                    position: restaurant.position,
-                    map: map,
-                    title: restaurant.name
-                });
+            const service = new google.maps.places.PlacesService(map);
 
-                // Optional: Add info windows for each marker
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `<h3>${restaurant.name}</h3>`
-                });
+            const request = {
+                location: georgiaTech,
+                radius: 1000,
+                type: ['restaurant']
+            };
 
-                marker.addListener('click', () => {
-                    infoWindow.open(map, marker);
-                });
+            // Perform nearby search
+            service.nearbySearch(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    results.forEach(place => {
+                        // Create a marker for each restaurant
+                        const marker = new google.maps.Marker({
+                            map: map,
+                            position: place.geometry.location,
+                            title: place.name
+                        });
+
+                        // Build the content for the info window, including descriptions
+                        const infoWindowContent = `
+                            <div>
+                                <h3>${place.name}</h3>
+                                <p>${place.vicinity}</p>
+                                <p>Rating: ${place.rating || 'No rating available'}</p>
+                                <p>${place.user_ratings_total || 'No'} reviews</p>
+                            </div>
+                        `;
+
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: infoWindowContent
+                        });
+
+                        // Add a click listener to the marker
+                        marker.addListener('click', () => {
+                            // Close the previous info window if it's open
+                            if (currentInfoWindow) {
+                                currentInfoWindow.close();
+                            }
+
+                            // Open the clicked info window and set it as the current one
+                            infoWindow.open(map, marker);
+                            currentInfoWindow = infoWindow;
+                        });
+                    });
+
+                    // Add a listener to close the info window when clicking outside on the map
+                    map.addListener('click', () => {
+                        if (currentInfoWindow) {
+                            currentInfoWindow.close();
+                            currentInfoWindow = null;
+                        }
+                    });
+                }
             });
         }
     </script>
 </head>
-<body>
-    <h1>Restaurant Locations</h1>
-
-    <!-- Div to hold the Google Map -->
-    <div id="map" style="height: 400px; width: 100%;"></div>
-
+<body onload="initMap()">
+    <h1>Restaurants near Georgia Tech</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
 </body>
 </html>
