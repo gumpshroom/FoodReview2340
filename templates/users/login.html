@@ -1,10 +1,95 @@
 {% block content %}
-    <h1>User Login</h1>
-    <form class="form-with-validation" action="/users/login/" method="post">
+
+    {% load static %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet"/>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
+        <script type="module"
+                src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+        <title>ATL Food Finder</title>
+        <style>
+
+            .top-right {
+                display: flex;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+
+            .searchbar {
+                display: block;
+                width: 40%;
+            }
+
+            body {
+                background-image: url("{% static 'images/background.png' %}");
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+    <nav class="top pink2">
+
+    <a href="/foodFind/map/">
+        <i>map</i>
+        <div>Map</div>
+    </a>
+    <h5 class="max center-align">Atlanta Food Finder</h5>
+
+        <a href="/foodFind/">
+            <i>search</i>
+            <div>Search</div>
+        </a>
+
+</nav>
+
+    <main class="responsive">
+    <div class="responsive tiny-height"></div>
+        <div class="padding">
+    <article class="responsive large-padding center center-align pink1 large-round">
+        <div class="padding">
+            <div class="grid">
+                <div class="s6">
+                <div class="padding">
+                    <div class="responsive tiny-height"></div>
+                    <h3 class="center-align middle-align">Log in to your account</h3>
+                    <p>or <a href="/users/register/" class="btn-register link">register</a></p>
+                </div>
+                </div>
+
+                <div class="s6">
+        <form class="form-with-validation" action="/users/login/" method="post">
         {% csrf_token %}
-        {{ form }}
+        <div class="field label prefix border">
+            <i>person</i>
+            <input type="text" name="username" required id="id_username" placeholder=" ">
+            <label>Username</label>
+        </div>
+        <div class="field label prefix border">
+            <i>person</i>
+            <input type="password" name="password" required id="id_password" placeholder=" ">
+            <label>Password</label>
+        </div>
         <button type="submit">Log In</button>
     </form>
-    <a href="/users/register/" class="btn-register">Register for an Account</a>
+            </div>
+
+            </div>
+        </div>
+    </article>
+</div>
+
+
+    </main>
+    </body>
 {% endblock %}
 
