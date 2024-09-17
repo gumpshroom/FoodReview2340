@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Places API Example</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ
+    &libraries=places"></script>
+    <script>
+        let map;
+        let currentInfoWindow = null;  // To track the currently open info window
+
+        function initMap() {
+            const georgiaTech = { lat: 33.7756, lng: -84.3963 };
+
+            // Initialize the map
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: georgiaTech,
+                zoom: 15
+            });
+
+            const service = new google.maps.places.PlacesService(map);
+
+            const request = {
+                location: georgiaTech,
+                radius: 1000,
+                type: ['restaurant']
+            };
+
+            // Perform nearby search
+            service.nearbySearch(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    results.forEach(place => {
+                        // Create a marker for each restaurant
+                        const marker = new google.maps.Marker({
+                            map: map,
+                            position: place.geometry.location,
+                            title: place.name
+                        });
+
+                        // Build the content for the info window, including descriptions
+                        const infoWindowContent = `
+                            <div>
+                                <h3>${place.name}</h3>
+                                <p>${place.vicinity}</p>
+                                <p>Rating: ${place.rating || 'No rating available'}</p>
+                                <p>${place.user_ratings_total || 'No'} reviews</p>
+                            </div>
+                        `;
+
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: infoWindowContent
+                        });
+
+                        // Add a click listener to the marker
+                        marker.addListener('click', () => {
+                            // Close the previous info window if it's open
+                            if (currentInfoWindow) {
+                                currentInfoWindow.close();
+                            }
+
+                            // Open the clicked info window and set it as the current one
+                            infoWindow.open(map, marker);
+                            currentInfoWindow = infoWindow;
+                        });
+                    });
+
+                    // Add a listener to close the info window when clicking outside on the map
+                    map.addListener('click', () => {
+                        if (currentInfoWindow) {
+                            currentInfoWindow.close();
+                            currentInfoWindow = null;
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <h1>Restaurants near Georgia Tech</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</body>
+</html>
