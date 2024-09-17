@@ -9,7 +9,7 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             login(request, form.save())
-            return redirect('/foodFind/loggedIn/')
+            return redirect('/foodFind/')
     else:
         form = UserCreationForm()
     return render(request, 'users/register.html', {'form': form})
@@ -19,7 +19,7 @@ def login_view(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect('/foodFind/loggedIn/')
+            return redirect('/foodFind/')
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html', {'form': form})
