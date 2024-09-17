@@ -9,8 +9,7 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             login(request, form.save())
-            messages.success(request, f'Your account has been created!')
-            return redirect('/foodFind/')
+            return redirect('/foodFind/loggedIn/')
     else:
         form = UserCreationForm()
     return render(request, 'users/register.html', {'form': form})
@@ -20,12 +19,11 @@ def login_view(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect('/foodFind/')
+            return redirect('/foodFind/loggedIn/')
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html', {'form': form})
 
 def logout_view(request):
-    if request.method == 'POST':
-        logout(request)
-        return redirect('/foodFind/')
+    logout(request)
+    return redirect('/foodFind/')
