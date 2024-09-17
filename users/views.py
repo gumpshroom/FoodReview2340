@@ -27,3 +27,6 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('/foodFind/')
+
+def favorites_view(request):
+    return render(request, 'users/favorites.html')
