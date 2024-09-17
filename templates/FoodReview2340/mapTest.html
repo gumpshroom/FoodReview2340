@@ -23,7 +23,7 @@
 
             const request = {
                 location: atlanta,
-                radius: 5000,
+                radius: 1000,
                 type: ['restaurant']
             };
 
@@ -80,5 +80,7 @@
 <body onload="initMap()">
     <h1>Restaurants in Atlanta</h1>
     <div id="map" style="height: 500px; width: 100%;"></div>
+    <label for="radius">Radius (km):</label>
+    <input type="number" id="radius" name="radius" placeholder="Enter radius in km">
 </body>
 </html>
