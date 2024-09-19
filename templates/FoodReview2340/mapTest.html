@@ -8,10 +8,12 @@
     &libraries=places"></script>
     <script>
         let map;
+        let service;
         let currentInfoWindow = null;  // To track the currently open info window
+        let markers = []; // To keep track of all the markers
 
         function initMap() {
-            const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 }; // atlanta location
+            const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 }; // Atlanta location
 
             // Initialize the map
             map = new google.maps.Map(document.getElementById('map'), {
@@ -19,13 +21,25 @@
                 zoom: 15
             });
 
-            const service = new google.maps.places.PlacesService(map);
+            // Initialize the Places service
+            service = new google.maps.places.PlacesService(map);
+
+            // Perform an initial search with default radius
+            performSearch(1000);  // Default radius: 1000 meters
+        }
+
+        // Function to perform a nearby search with the given radius
+        function performSearch(radius) {
+            const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 };
 
             const request = {
                 location: atlanta,
-                radius: 1000,
+                radius: radius,
                 type: ['restaurant']
             };
+
+            // Clear existing markers from the map
+            clearMarkers();
 
             // Perform nearby search
             service.nearbySearch(request, (results, status) => {
@@ -37,6 +51,9 @@
                             position: place.geometry.location,
                             title: place.name
                         });
+
+                        // Store the marker in the markers array
+                        markers.push(marker);
 
                         // Build the content for the info window, including descriptions
                         const infoWindowContent = `
@@ -75,12 +92,34 @@
                 }
             });
         }
+
+        // Function to clear all markers from the map
+        function clearMarkers() {
+            for (let i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            markers = [];
+        }
+
+        // Function to handle radius change and re-perform the search
+        function updateRadius() {
+            const newRadius = document.getElementById('radius').value;
+            if (newRadius) {
+                performSearch(parseInt(newRadius) * 1000);  // Convert km to meters
+            }
+        }
     </script>
 </head>
 <body onload="initMap()">
     <h1>Restaurants in Atlanta</h1>
+
+    <!-- Map container -->
     <div id="map" style="height: 500px; width: 100%;"></div>
+
+    <!-- Input field for radius -->
     <label for="radius">Radius (km):</label>
     <input type="number" id="radius" name="radius" placeholder="Enter radius in km">
+    <button onclick="updateRadius()">Update Radius</button> <!-- Button to trigger radius update -->
+
 </body>
 </html>
