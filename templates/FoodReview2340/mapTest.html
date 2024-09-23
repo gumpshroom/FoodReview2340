@@ -41,10 +41,20 @@
                         // Build the content for the info window, including descriptions
                         const infoWindowContent = `
                             <div>
-                                <h3>${place.name}</h3>
-                                <p>${place.vicinity}</p>
-                                <p>Rating: ${place.rating || 'No rating available'}</p>
-                                <p>${place.user_ratings_total || 'No'} reviews</p>
+                                {% if user.is_authenticated %}
+                                    <h3>${place.name}</h3>
+                                    <p>${place.vicinity}</p>
+                                    <p>Rating: ${place.rating || 'No rating available'}</p>
+                                    <p>${place.user_ratings_total || 'No'} reviews</p>
+                                    <button onclick="addToFavorites('${place.place_id}', '${place.name}', '${place.rating}')">
+                                        Add to Favorites
+                                    </button>
+                                {% else %}
+                                    <h3>${place.name}</h3>
+                                    <p>${place.vicinity}</p>
+                                    <p>Rating: ${place.rating || 'No rating available'}</p>
+                                    <p>${place.user_ratings_total || 'No'} reviews</p>
+                                {% endif %}
                             </div>
                         `;
 
@@ -75,10 +85,58 @@
                 }
             });
         }
+
+        function addToFavorites(place_id, name, rating) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/users/addFavorites/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    'place_id': place_id,
+                    'name': name,
+                    'rating': rating,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show an alert message for success
+                    alert("${name} has been added to your favorites!");
+                } else {
+                    // Show an alert if the restaurant is already in the favorites
+                    alert("${name} is already in your favorites.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding to favorites. Please try again.');
+            });
+        }
+
+        {#function getCookie(name) {#}
+        {#    let cookieValue = null;#}
+        {#    if (document.cookie && document.cookie !== '') {#}
+        {#        const cookies = document.cookie.split(';');#}
+        {#        for (let i = 0; i < cookies.length; i++) {#}
+        {#            const cookie = cookies[i].trim();#}
+        {#            if (cookie.substring(0, name.length + 1) === (name + '=')) {#}
+        {#                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));#}
+        {#                break;#}
+        {#            }#}
+        {#        }#}
+        {#    }#}
+        {#    return cookieValue;#}
     </script>
 </head>
 <body onload="initMap()">
     <h1>Restaurants near Georgia Tech</h1>
+
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
     <div id="map" style="height: 500px; width: 100%;"></div>
 </body>
 </html>

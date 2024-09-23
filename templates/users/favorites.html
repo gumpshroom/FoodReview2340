@@ -1,4 +1,16 @@
 {% block content %}
-    <h1>Favorites</h1>
+    <h1>Your Favorite Restaurants</h1>
 
+    <ul>
+        {% for favorite in favorites %}
+            <li>
+                <h3>{{ favorite.name }}</h3>
+                <p>Address: {{ favorite.vicinity }}</p>
+                <p>Rating: {{ favorite.rating }} ({{ favorite.user_ratings_total }} reviews)</p>
+                <p>Cuisine: {{ favorite.cuisine }}</p>
+            </li>
+        {% empty %}
+            <p>You don't have any favorite restaurants yet!</p>
+        {% endfor %}
+    </ul>
 {% endblock %}
