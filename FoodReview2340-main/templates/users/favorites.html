@@ -1,9 +1,0 @@
-{% block content %}
-    <h1>User Login</h1>
-    <form class="form-with-validation" action="/users/login/" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <button type="submit">Log In</button>
-    </form>
-    <a href="/users/register/" class="btn-register">Register for an Account</a>
-{% endblock %}
