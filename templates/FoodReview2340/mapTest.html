@@ -6,109 +6,136 @@
     <title>Google Places API Example</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ
     &libraries=places"></script>
-    <script>
-        let map;
-        let service;
-        let currentInfoWindow = null;  // To track the currently open info window
-        let markers = []; // To keep track of all the markers
+<script>
+    let map;
+    let service;
+    let currentInfoWindow = null;  // To track the currently open info window
+    let markers = []; // To keep track of all the markers
 
-        function initMap() {
-            const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 }; // Atlanta location
+    function initMap() {
+        const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 }; // Atlanta location
 
-            // Initialize the map
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: atlanta,
-                zoom: 15
-            });
+        // Initialize the map
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: atlanta,
+            zoom: 15
+        });
 
-            // Initialize the Places service
-            service = new google.maps.places.PlacesService(map);
+        // Initialize the Places service
+        service = new google.maps.places.PlacesService(map);
 
-            // Perform an initial search with default radius
-            performSearch(1000);  // Default radius: 1000 meters
-        }
+        // Perform an initial search with default radius
+        performSearch(1000);  // Default radius: 1000 meters
+    }
 
-        // Function to perform a nearby search with the given radius
-        function performSearch(radius) {
-            const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 };
+    // Function to perform a nearby search with the given radius
+    function performSearch(radius) {
+        const atlanta = { lat: 33.74969690485657, lng: -84.39235565742148 };
 
-            const request = {
-                location: atlanta,
-                radius: radius,
-                type: ['restaurant']
-            };
+        const request = {
+            location: atlanta,
+            radius: radius,
+            type: ['restaurant']
+        };
 
-            // Clear existing markers from the map
-            clearMarkers();
+        // Clear existing markers from the map
+        clearMarkers();
 
-            // Perform nearby search
-            service.nearbySearch(request, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    results.forEach(place => {
-                        // Create a marker for each restaurant
-                        const marker = new google.maps.Marker({
-                            map: map,
-                            position: place.geometry.location,
-                            title: place.name
-                        });
-
-                        // Store the marker in the markers array
-                        markers.push(marker);
-
-                        // Build the content for the info window, including descriptions
-                        const infoWindowContent = `
-                            <div>
-                                <h3>${place.name}</h3>
-                                <p>${place.vicinity}</p>
-                                <p>Rating: ${place.rating || 'No rating available'}</p>
-                                <p>${place.user_ratings_total || 'No'} reviews</p>
-                            </div>
-                        `;
-
-                        const infoWindow = new google.maps.InfoWindow({
-                            content: infoWindowContent
-                        });
-
-                        // Add a click listener to the marker
-                        marker.addListener('click', () => {
-                            // Close the previous info window if it's open
-                            if (currentInfoWindow) {
-                                currentInfoWindow.close();
-                            }
-
-                            // Open the clicked info window and set it as the current one
-                            infoWindow.open(map, marker);
-                            currentInfoWindow = infoWindow;
-                        });
+        // Perform nearby search
+        service.nearbySearch(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                results.forEach(place => {
+                    // Create a marker for each restaurant
+                    const marker = new google.maps.Marker({
+                        map: map,
+                        position: place.geometry.location,
+                        title: place.name
                     });
 
-                    // Add a listener to close the info window when clicking outside on the map
-                    map.addListener('click', () => {
-                        if (currentInfoWindow) {
-                            currentInfoWindow.close();
-                            currentInfoWindow = null;
-                        }
-                    });
+                    // Store the marker in the markers array
+                    markers.push(marker);
+
+                    // Call function to get place details (including description and photo)
+                    getPlaceDetails(place.place_id, marker);
+                });
+
+                // Add a listener to close the info window when clicking outside on the map
+                map.addListener('click', () => {
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                        currentInfoWindow = null;
+                    }
+                });
+            }
+        });
+    }
+
+    // Function to get details of a place (including the description and photo)
+    function getPlaceDetails(placeId, marker) {
+        const request = {
+            placeId: placeId,
+            fields: ['name', 'vicinity', 'rating', 'user_ratings_total', 'editorial_summary', 'photos'] // Specify the fields you want
+        };
+
+        service.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                // Build the content for the info window
+                const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
+
+                // Check if a photo is available
+                let photoUrl = '';
+                if (place.photos && place.photos.length > 0) {
+                    // Get the URL for the first photo
+                    photoUrl = place.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 });
                 }
-            });
-        }
 
-        // Function to clear all markers from the map
-        function clearMarkers() {
-            for (let i = 0; i < markers.length; i++) {
-                markers[i].setMap(null);
-            }
-            markers = [];
-        }
+                const infoWindowContent = `
+                    <div>
+                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                        <h3>${place.name}</h3>
+                        <p>${place.vicinity}</p>
+                        <p>Rating: ${place.rating || 'No rating available'}</p>
+                        <p>${place.user_ratings_total || 'No'} reviews</p>
+                        <p>${description}</p>
+                    </div>
+                `;
 
-        // Function to handle radius change and re-perform the search
-        function updateRadius() {
-            const newRadius = document.getElementById('radius').value;
-            if (newRadius) {
-                performSearch(parseInt(newRadius) * 1000);  // Convert km to meters
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoWindowContent
+                });
+
+                // Add a click listener to the marker
+                marker.addListener('click', () => {
+                    // Close the previous info window if it's open
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                    }
+
+                    // Open the clicked info window and set it as the current one
+                    infoWindow.open(map, marker);
+                    currentInfoWindow = infoWindow;
+                });
             }
+        });
+    }
+
+    // Function to clear all markers from the map
+    function clearMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
         }
-    </script>
+        markers = [];
+    }
+
+    // Function to handle radius change and re-perform the search
+    function updateRadius() {
+        const newRadius = document.getElementById('radius').value;
+        if (newRadius) {
+            performSearch(parseInt(newRadius) * 1000);  // Convert km to meters
+        }
+    }
+</script>
+
 </head>
 <body onload="initMap()">
     <h1>Restaurants in Atlanta</h1>
