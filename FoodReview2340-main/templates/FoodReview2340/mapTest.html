@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Places API Example</title>
+     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ
+    &libraries=places"></script>
+<script>
+    let map;
+    let service;
+    let currentInfoWindow = null;  // To track the currently open info window
+    let markers = []; // To keep track of all the markers
+
+      function initMap() {
+        // Try HTML5 geolocation.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              };
+
+              // Initialize the map centered on the user's location
+              map = new google.maps.Map(document.getElementById('map'), {
+                center: userLocation,
+                zoom: 15,
+              });
+
+              // Initialize the Places service
+              service = new google.maps.places.PlacesService(map);
+
+              // Perform an initial search with default radius
+              performSearch(1000);  // Default radius: 1000 meters
+
+              // Add a marker at the user's location
+              new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                title: "You are here",
+                icon: {
+                  url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                }
+              });
+            },
+            function () {
+              handleLocationError(true, map.getCenter());
+            }
+          );
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, map.getCenter());
+        }
+      }
+
+      function handleLocationError(browserHasGeolocation, pos) {
+        alert(
+          browserHasGeolocation
+            ? "Error: The Geolocation service failed."
+            : "Error: Your browser doesn't support geolocation."
+        );
+      }
+
+      // Function to perform a nearby search with the given radius
+      function performSearch(radius) {
+        const userLocation = map.getCenter();
+
+        const request = {
+          location: userLocation,
+          radius: radius,
+          type: ['restaurant'],
+        };
+
+        // Clear existing markers from the map
+        clearMarkers();
+
+        // Perform nearby search
+        service.nearbySearch(request, (results, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK) {
+            results.forEach(place => {
+              // Create a marker for each restaurant
+              const marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location,
+                title: place.name,
+              });
+
+              // Store the marker in the markers array
+              markers.push(marker);
+
+              // Call function to get place details (including description and photo)
+              getPlaceDetails(place.place_id, marker);
+            });
+
+            // Add a listener to close the info window when clicking outside on the map
+            map.addListener('click', () => {
+              if (currentInfoWindow) {
+                currentInfoWindow.close();
+                currentInfoWindow = null;
+              }
+            });
+          }
+        });
+      }
+
+      function clearMarkers() {
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+      }
+
+      function getPlaceDetails(placeId, marker) {
+        // Function to get place details (including description and photo)
+        // Implement this function based on your requirements
+      }
+
+    // Function to get details of a place (including the description and photo)
+    function getPlaceDetails(placeId, marker) {
+        const request = {
+            placeId: placeId,
+            fields: ['name', 'vicinity', 'rating', 'user_ratings_total', 'editorial_summary', 'photos'] // Specify the fields you want
+        };
+
+        service.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                // Build the content for the info window
+                const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
+
+                // Check if a photo is available
+                let photoUrl = '';
+                if (place.photos && place.photos.length > 0) {
+                    // Get the URL for the first photo
+                    photoUrl = place.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 });
+                }
+
+                const infoWindowContent = `
+                    <div>
+                        {% if user.is_authenticated %}
+                            ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                            <h3>${place.name}</h3>
+                            <p>${place.vicinity}</p>
+                            <p>Rating: ${place.rating || 'No rating available'}</p>
+                            <p>${place.user_ratings_total || 'No'} reviews</p>
+                            <p>${description}</p>
+                            <button onclick="addToFavorites('${place.place_id}', '${place.name}', '${place.rating}')">Add to Favorites
+                            </button>
+                        {% else %}
+                            ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                            <h3>${place.name}</h3>
+                            <p>${place.vicinity}</p>
+                            <p>Rating: ${place.rating || 'No rating available'}</p>
+                            <p>${place.user_ratings_total || 'No'} reviews</p>
+                            <p>${description}</p>
+                        {% endif %}
+                    </div>
+                `;
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoWindowContent
+                });
+
+                // Add a click listener to the marker
+                marker.addListener('click', () => {
+                    // Close the previous info window if it's open
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                    }
+
+                    // Open the clicked info window and set it as the current one
+                    infoWindow.open(map, marker);
+                    currentInfoWindow = infoWindow;
+                });
+            }
+        });
+    }
+
+    // Function to clear all markers from the map
+    function clearMarkers() {
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].setMap(null);
+        }
+        markers = [];
+    }
+
+    // Function to handle radius change and re-perform the search
+    function updateRadius() {
+        const newRadius = document.getElementById('radius').value;
+        if (newRadius) {
+            performSearch(parseInt(newRadius) * 1000);  // Convert km to meters
+        }
+    }
+
+    function addToFavorites(place_id, name, rating) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('/users/addFavorites/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                'place_id': place_id,
+                'name': name,
+                'rating': rating,
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show an alert message for success
+                    alert("${name} has been added to your favorites!");
+                } else {
+                    // Show an alert if the restaurant is already in the favorites
+                    alert("${name} is already in your favorites.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding to favorites. Please try again.');
+            });
+    }
+
+</script>
+
+</head>
+<body onload="initMap()">
+    <h1>Restaurants in Atlanta</h1>
+
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+    <!-- Map container -->
+    <div id="map" style="height: 500px; width: 100%;"></div>
+
+    <!-- Input field for radius -->
+    <label for="radius">Radius (km):</label>
+    <input type="number" id="radius" name="radius" placeholder="Enter radius in km">
+    <button onclick="updateRadius()">Update Radius</button> <!-- Button to trigger radius update -->
+
+</body>
+</html>
