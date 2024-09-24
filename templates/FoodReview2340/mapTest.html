@@ -192,20 +192,20 @@
     }
 
     function addToFavorites(place_id, name, rating) {
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            fetch('/users/addFavorites/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    'place_id': place_id,
-                    'name': name,
-                    'rating': rating,
-                })
+        fetch('/users/addFavorites/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                'place_id': place_id,
+                'name': name,
+                'rating': rating,
             })
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -220,7 +220,7 @@
                 console.error('Error:', error);
                 alert('An error occurred while adding to favorites. Please try again.');
             });
-        }
+    }
 
 </script>
 
