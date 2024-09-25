@@ -1,0 +1,102 @@
+{% block content %}
+
+    {% load static %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet"/>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
+        <script type="module"
+                src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+        <title>ATL Food Finder</title>
+        <style>
+
+            .top-right {
+                display: flex;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+
+            .searchbar {
+                display: block;
+                width: 40%;
+            }
+
+            body {
+                background-image: url("{% static 'images/background.png' %}");
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+
+        </style>
+    <script>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ",
+    v: "weekly",
+    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+    // Add other bootstrap parameters as needed, using camel case.
+  });
+</script>
+    </head>
+
+    <body class="light">
+
+    <nav class="top pink2">
+
+    <a href="/foodFind/map/">
+        <i>map</i>
+        <div>Map</div>
+    </a>
+    <h5 class="max center-align">Atlanta Food Finder</h5>
+
+        <a href="/foodFind/">
+            <i>search</i>
+            <div>Search</div>
+        </a>
+
+</nav>
+
+    <main class="responsive">
+    <div class="responsive tiny-height"></div>
+        <div class="padding">
+    <article class="responsive large-padding center center-align pink1 large-round">
+        <div class="padding">
+            <div class="grid">
+                <div class="s6">
+                <div class="padding">
+                    <div class="responsive tiny-height"></div>
+                    <h3 class="center-align middle-align">Log in to your account</h3>
+                    <p>or <a href="/users/register/" class="btn-register link">register</a></p>
+                </div>
+                </div>
+
+                <div class="s6">
+        <form class="form-with-validation" action="/users/login/" method="post">
+        {% csrf_token %}
+        <div class="field label prefix border">
+            <i>person</i>
+            <input type="text" name="username" required id="id_username" placeholder=" ">
+            <label>Username</label>
+        </div>
+        <div class="field label prefix border">
+            <i>key</i>
+            <input type="password" name="password" required id="id_password" placeholder=" ">
+            <label>Password</label>
+        </div>
+        <button type="submit">Log In</button>
+    </form>
+            </div>
+
+            </div>
+        </div>
+    </article>
+</div>
+
+
+    </main>
+    </body>
+{% endblock %}
+
