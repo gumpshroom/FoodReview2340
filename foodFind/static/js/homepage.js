@@ -33,6 +33,23 @@ document.getElementById('searchInput').onkeydown = function (event) {
     }
 }
 
+function doStars(stars) {
+    console.log("do stars")
+    var fullStars = Math.floor(stars);
+    var halfStar = Math.round(stars - fullStars);
+    var output = ""
+    for (var i = 0; i < fullStars; i++) {
+        output += '<i class="fill extra">star</i>';
+    }
+    if (halfStar) {
+        output += ('<i class="fill extra">star_half</i>');
+    }
+    for (var i = 0; i < 5 - fullStars - halfStar; i++) {
+        output += ('<i class="extra">star</i>');
+    }
+    return output
+}
+
 async function submitSearch() {
     //get custom filters and stuff
     const {Place} = await google.maps.importLibrary("places");
@@ -78,11 +95,9 @@ async function submitSearch() {
                         <div class="grid">
                             <div class="s1 m3 l12">
                                 <div class="middle-align">
-                                    <i class="fill extra">star</i>
-                                    <i class="fill extra">star</i>
-                                    <i class="fill extra">star</i>
-                                    <i class="extra">star_half</i>
-                                    <i class="extra">star</i>
+                                
+                                ${doStars(place.rating)}
+                                    
                                 </div>
                                 
                                 
@@ -90,7 +105,7 @@ async function submitSearch() {
                             <div class="s1 m4 l12">
                             <h5 class="left-align">${place.rating} stars
                                 <br><h6 class="small-text italic gray left-align">${place.userRatingCount} ratings</h6></h5>
-                                <h6 class="small-text left-align gray">${(place.priceLevel.charAt(0) === "F" || place.priceLevel.charAt(0) === "I") ? "$" : (place.priceLevel.charAt(0) === "M") ? "$$" : "$$$"} · ${place.priceLevel.toLowerCase()}</h6>
+                                <h6 class="small-text left-align gray">${(!place.priceLevel || place.priceLevel.charAt(0) === "F" || place.priceLevel.charAt(0) === "I") ? "$" : (place.priceLevel.charAt(0) === "M") ? "$$" : "$$$"} · ${place.priceLevel ? place.priceLevel.toLowerCase() : "no price data"}</h6>
 </div>
                             <hr>
                             <div class="s6 m12 l12">
