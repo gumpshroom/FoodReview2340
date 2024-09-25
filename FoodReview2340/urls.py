@@ -15,15 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView  # Import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('', include('foodFind.urls')),
-<<<<<<< HEAD:FoodReview2340-main/FoodReview2340/urls.py
     path('foodFind/', include('foodFind.urls')),
-=======
-
->>>>>>> 6ec9dac (Connected the map button to the map app so it will display a map when clicked - September 15 Aaron Luu):FoodReview2340/urls.py
 ]
