@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from users.forms import CustomUserCreationForm
 from users.models import Favorite
@@ -16,7 +17,10 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             login(request, form.save())
+            messages.success(request, 'Successfully registered account.')  # Success message
             return redirect('/foodFind/')
+        else:
+            messages.error(request, f'Error registering account: {form.errors}')  # Error message, can replace message with "Error registering account"
     else:
         form = CustomUserCreationForm()
     return render(request, 'users/register.html', {'form': form})
@@ -26,7 +30,10 @@ def login_view(request):
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
+            messages.success(request, 'Successfully logged in.')  # Success message
             return redirect('/foodFind/')
+        else:
+            messages.error(request, 'Error logging in: Invalid credentials.')  # Error message
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html', {'form': form})
