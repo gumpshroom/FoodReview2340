@@ -43,13 +43,15 @@ def add_to_favorites_view(request):
             data = json.loads(request.body)
             place_id = data.get('place_id')
             name = data.get('name')
-            address = data.get('address')
-            vicinity = data.get('vicinity', None)  # Optional field
-            rating = data.get('rating', None)  # Optional field
-            cuisine = data.get('cuisine', None)  # Optional field
+            rating = data.get('rating')
+
+            # Debugging log
+            print(f"Received place_id: {place_id}")
+            print(f"name: {name}")
 
             # Check if this place is already in the user's favorites
             favorite_exists = Favorite.objects.filter(user=request.user, place_id=place_id).exists()
+            print(f"Favorite exists: {favorite_exists}")  # Debugging log
 
             if favorite_exists:
                 return JsonResponse({'success': False, 'message': f'{name} is already in your favorites.'}, status=200)
@@ -59,15 +61,13 @@ def add_to_favorites_view(request):
                 user=request.user,
                 place_id=place_id,
                 name=name,
-                address=address,
-                vicinity=vicinity,
                 rating=rating,
-                cuisine=cuisine
             )
 
             return JsonResponse({'success': True, 'message': 'Favorite added successfully!'}, status=201)
 
         except Exception as e:
+            print(f"Error: {e}")  # Debugging log
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
