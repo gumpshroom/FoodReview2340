@@ -1,6 +1,4 @@
 var searchOpen = false
-
-
 anime({
     targets: 'article',
     opacity: 1,
@@ -50,6 +48,21 @@ function doStars(stars) {
     return output
 }
 
+function doReviews(reviews) {
+    console.log("do reviews")
+    var output = "<div class='none small-height auto-width scroll'>"
+    if (!reviews.length) {
+        return "No reviews available"
+    }
+    reviews.forEach((review) => {
+        output += `<article class='round'><div class="tiny-padding"><div class="grid"><div class="s1 m1 l1">`
+        output += `<img class="tiny middle" src="${review.authorAttribution.photoURI}"></div>
+                    <div class="s1 m1 l11"><p class="middle-align left-align small-margin large-text bold">${review.authorAttribution.displayName}</p></div>`
+        output += `<div class="s2 m2 l12"><p class="responsive left-align top-align no-margin">${review.text}</p></div></div></div></article>`
+    })
+    return output + "</div>"
+}
+
 async function submitSearch() {
     //get custom filters and stuff
     const {Place} = await google.maps.importLibrary("places");
@@ -57,7 +70,7 @@ async function submitSearch() {
     var query = document.getElementById('searchInput').value.trim()
     const request = {
         textQuery: query,
-        fields: ["displayName", "primaryTypeDisplayName", "location", "businessStatus", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "types"],
+        fields: ["displayName", "primaryTypeDisplayName", "location", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "reviews"],
         includedType: "restaurant",
         locationBias: {lat: 33.74969690485657, lng: -84.39235565742148},
         isOpenNow: true,
@@ -80,20 +93,46 @@ async function submitSearch() {
             if (!place.editorialSummary) {
                 editorial = await fetch("/generateDescription?restaurantName=" + place.displayName + "&restaurantType=" + place.primaryTypeDisplayName).then(response => response.text())
             }
+            var AIopinion = await fetch("/summarizeComments?review1=" + (place.reviews.length ? place.reviews[0].text : "nothing") + "&reviewRandom=" + (place.reviews.length ? place.reviews[Math.floor(Math.random() * place.reviews.length)].text : "nothing")).then(response => response.text())
 
             var cardTemplate = `
 <div class="padding" id="${place.id}">
-        <article class="responsive large-padding center center-align pink1 large-round" style="opacity:0.3">
-            <div class="grid">
-                <div class="s6">
-                    <img class="responsive medium-height" src="${place.photos[1].getURI()}" alt="" style="width:100%;height:100%;opacity:70%">
+        <article class="responsive large-padding center center-align pink1 large-round middle-align auto-width auto-height" style="opacity:0.3">
+            <div class="grid middle-align auto-height max">
+                <div class="s1 m1 l6">
+                    <img style="width:100%; object-fit:cover" class="medium-height middle-align" src="${place.photos[1].getURI()}" alt="" style="width:100%;height:100%;opacity:70%">
                     <div class="absolute top left right padding top-shadow white-text"><h5>${place.displayName}</h5>
                         <p>${place.primaryTypeDisplayName}</p></div>
                 </div>
-                <div class="s6">
-                    <div class="padding middle">
+                <div class="s1 m2 l6">
+                   
+                        <div class="grid medium-height">
+                        <div class="s1 m1 l12">
+                        
+                <nav class="tabbed small elevate">
+                    <a class="active" data-ui="#overview-${place.id}" tabindex="0">
+                        <i>info</i>
+                        <span>Overview</span>
+                    </a>
+                    <a data-ui="#reviews-${place.id}" tabindex="0">
+                        <i>group</i>
+                        <span>Reviews</span>
+                    </a>
+                    <!--a data-ui="#map-${place.id}" tabindex="0">
+                        <i>map</i>
+                        <span>Map</span>
+                    </a-->
+                    
+                </nav>
+                
+                
+                        </div>
+                        <div class="s1 m2 l12">
+                        
+                        <div class="page active" id="overview-${place.id}">
+                        <div class="tiny-padding">
                         <div class="grid">
-                            <div class="s1 m3 l12">
+                            <div class="s1 m3 l12"> 
                                 <div class="middle-align">
                                 
                                 ${doStars(place.rating)}
@@ -102,23 +141,40 @@ async function submitSearch() {
                                 
                                 
                             </div>
-                            <div class="s1 m4 l12">
+                            <div class="s1 m4 l6">
                             <h5 class="left-align">${place.rating} stars
                                 <br><h6 class="small-text italic gray left-align">${place.userRatingCount} ratings</h6></h5>
                                 <h6 class="small-text left-align gray">${(!place.priceLevel || place.priceLevel.charAt(0) === "F" || place.priceLevel.charAt(0) === "I") ? "$" : (place.priceLevel.charAt(0) === "M") ? "$$" : "$$$"} · ${place.priceLevel ? place.priceLevel.toLowerCase() : "no price data"}</h6>
 </div>
+<div class="s1 m4 l6 right-align">
+                                <button class="round">View in Map</button>
+                                <br><br>
+                                <button class="border round">Add to Favorites</button>
+                            </div>
                             <hr>
-                            <div class="s6 m12 l12">
+                            <div class="s1 m12 l12">
                                 <p class="left-align">${place.editorialSummary ? editorial : editorial + "<br><p class='italic small-text left-align'>Description generated by AI</p>"}</p>
                             </div>
-                            <div class="s15 m12 l12">
-                                <nav>
-                                    <button class="round">View in Map</button>
-                                    <button class="border round">Add to Favorites</button>
-                                </nav>
+                            
                             </div>
+                            </div>
+                            </div>
+                            <div class="page" id="reviews-${place.id}">
+                                <div class="tiny-padding none">
+                                    
+                                        ${doReviews(place.reviews)}
+                                    
+                                </div>
+                                <div class ="s1 m2 l12">
+                            <p class="italic small-text">AI says: ${AIopinion} </p>
+</div>
+                            </div>
+                            </div>
+                            
+                            
+                            
                         </div>
-                    </div>
+                    
                 </div>
             </div>
         </article>
