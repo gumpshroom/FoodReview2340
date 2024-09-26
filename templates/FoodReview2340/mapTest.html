@@ -74,6 +74,9 @@
                 fields: ['place_id', 'name', 'vicinity', 'rating']  // Ensure 'place_id' is included
             };
 
+            // Clear existing markers from the map
+            clearMarkers();
+
             service.nearbySearch(request, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
                     results.forEach(place => {
@@ -127,25 +130,25 @@
 
                     // Ensure place_id is available and passed into the addToFavorites function
                     const infoWindowContent = `
-                    <div>
-                        {% if user.is_authenticated %}
-                            ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
-                            <h3>${place.name}</h3>
-                            <p>${place.vicinity}</p>
-                            <p>Rating: ${place.rating || 'No rating available'}</p>
-                            <p>${place.user_ratings_total || 'No'} reviews</p>
-                            <p>${description}</p>
-                            <button onclick="addToFavorites('${place.place_id}', '${place.name}', '${place.rating}')">Add to Favorites</button>
-                        {% else %}
-                            ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
-                            <h3>${place.name}</h3>
-                            <p>${place.vicinity}</p>
-                            <p>Rating: ${place.rating || 'No rating available'}</p>
-                            <p>${place.user_ratings_total || 'No'} reviews</p>
-                            <p>${description}</p>
-                        {% endif %}
-                    </div>
-                `;
+                        <div>
+                            {% if user.is_authenticated %}
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                                <h3>${place.name}</h3>
+                                <p>${place.vicinity}</p>
+                                <p>Rating: ${place.rating || 'No rating available'}</p>
+                                <p>${place.user_ratings_total || 'No'} reviews</p>
+                                <p>${description}</p>
+                                <button onclick="addToFavorites('${place.place_id}', '${place.name}', '${place.rating}')">Add to Favorites</button>
+                            {% else %}
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                                <h3>${place.name}</h3>
+                                <p>${place.vicinity}</p>
+                                <p>Rating: ${place.rating || 'No rating available'}</p>
+                                <p>${place.user_ratings_total || 'No'} reviews</p>
+                                <p>${description}</p>
+                            {% endif %}
+                        </div>
+                    `;
 
                     const infoWindow = new google.maps.InfoWindow({
                         content: infoWindowContent

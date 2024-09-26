@@ -46,12 +46,12 @@ def add_to_favorites_view(request):
             rating = data.get('rating')
 
             # Debugging log
-            print(f"Received place_id: {place_id}")
-            print(f"name: {name}")
+            # print(f"Received place_id: {place_id}")
+            # print(f"name: {name}")
 
             # Check if this place is already in the user's favorites
             favorite_exists = Favorite.objects.filter(user=request.user, place_id=place_id).exists()
-            print(f"Favorite exists: {favorite_exists}")  # Debugging log
+            # print(f"Favorite exists: {favorite_exists}")  # Debugging log
 
             if favorite_exists:
                 return JsonResponse({'success': False, 'message': f'{name} is already in your favorites.'}, status=200)

@@ -27,13 +27,14 @@
         body {
             background-image: url("{% static 'images/background.png' %}");
             background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
         }
 
     </style>
 
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 </head>
 
 <body class="light">
@@ -167,6 +168,7 @@
         // Add other bootstrap parameters as needed, using camel case.
     });
 </script>
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script src="{% static 'js/anime.min.js' %}"></script>
 <script src="{% static 'js/homepage.js' %}"></script>
 </body>

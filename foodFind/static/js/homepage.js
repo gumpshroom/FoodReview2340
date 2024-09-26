@@ -63,6 +63,38 @@ function doReviews(reviews) {
     return output + "</div>"
 }
 
+function addToFavorites(place_id, name, rating) {
+    console.log('Adding to favorites:', place_id, name, rating);  // Debugging log
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('/users/addFavorites/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            'place_id': place_id,
+            'name': name,
+            'rating': rating,
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);  // Debugging log
+            if (data.success) {
+                alert(`${name} has been added to your favorites!`);
+            } else {
+                alert(`${name} is already in your favorites.`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding to favorites. Please try again.');
+        });
+}
+
 async function submitSearch() {
     //get custom filters and stuff
     const {Place} = await google.maps.importLibrary("places");
@@ -149,7 +181,7 @@ async function submitSearch() {
 <div class="s1 m4 l6 right-align">
                                 <button class="round">View in Map</button>
                                 <br><br>
-                                <button class="border round">Add to Favorites</button>
+                                <button class="border round" onclick="addToFavorites('${place.id}', '${place.displayName}', '${place.rating}')">Add to Favorites</button>
                             </div>
                             <hr>
                             <div class="s1 m12 l12">
