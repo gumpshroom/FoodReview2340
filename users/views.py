@@ -70,4 +70,4 @@ def favorites_list_view(request):
     if request.user.is_authenticated:
         favorites = Favorite.objects.filter(user=request.user)
         return render(request, 'users/favorites.html', {'favorites': favorites})
-    return redirect('login')  # Redirect to login if not authenticated
+    return redirect('login')
