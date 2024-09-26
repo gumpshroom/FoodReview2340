@@ -97,11 +97,11 @@ async function submitSearch() {
 
             var cardTemplate = `
 <div class="padding" id="${place.id}">
-        <article class="responsive large-padding center center-align pink1 large-round middle-align auto-width auto-height" style="opacity:0.3">
-            <div class="grid middle-align auto-height max">
-                <div class="s1 m1 l6">
-                    <img style="width:100%; object-fit:cover" class="medium-height middle-align" src="${place.photos[1].getURI()}" alt="" style="width:100%;height:100%;opacity:70%">
-                    <div class="absolute top left right padding top-shadow white-text"><h5>${place.displayName}</h5>
+        <article class="max large-padding center center-align pink1 large-round middle-align auto-width auto-height" style="opacity:0.3">
+            <div style="width:100%" class="grid middle-align auto-height max">
+                <div class="s1 m1 l6 auto-width">
+                    <img class="medium-height center-align max" src="${place.photos[1].getURI()}" alt="" style="width:100%;height:100%;opacity:70%">
+                    <div class="absolute top left right padding top-shadow white-text medium-height"><h5>${place.displayName}</h5>
                         <p>${place.primaryTypeDisplayName}</p></div>
                 </div>
                 <div class="s1 m2 l6">
