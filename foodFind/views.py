@@ -24,4 +24,20 @@ def generateDescription(request):
             ],
             model="llama3-8b-8192",
         )
-    return HttpResponse(chat_completion.choices[0].message.content)
+        return HttpResponse(chat_completion.choices[0].message.content)
+    else:
+        return HttpResponse("")
+def summarizeComments(request):
+    if request.method == 'GET' and request.GET.get('review1') and request.GET.get('reviewRandom'):
+
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Briefly summarize what people think about the restaurant based on the following reviews. One says: " + request.GET.get('review1') + ". Another review said: " + request.GET.get('reviewRandom') + ". Write as if you were providing unbiased advice to someone considering the restaurant. Output should be 1-2 very short incomplete but highly informational sentences without adjectives or listing anything (avoid commas). Do not prefix with anything, only output the response."
+                }
+            ],
+            model="llama3-8b-8192",
+        )
+        return HttpResponse(chat_completion.choices[0].message.content)
+    else: return HttpResponse("")
