@@ -13,12 +13,12 @@ from users.models import Favorite
 
 def register_view(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             login(request, form.save())
             return redirect('/foodFind/')
     else:
-        form = CustomUserCreationForm()
+        form = UserCreationForm()
     return render(request, 'users/register.html', {'form': form})
 
 def login_view(request):
