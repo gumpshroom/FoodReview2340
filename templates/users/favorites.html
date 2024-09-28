@@ -40,7 +40,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             margin-bottom: 20px;
-            padding: 20px;
+            padding: 20px 20px 10px 50px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
@@ -79,6 +79,18 @@
         .restaurant-info {
             flex-grow: 1;
         }
+
+        .link {
+            text-decoration: none;  /* No underline initially */
+            transition: all 0.3s ease;  /* Smooth transition effect */
+        }
+
+        .link:hover {
+            text-decoration: underline;  /* Underline on hover */
+            color: pink;  /* Keep the color */
+            text-shadow: 0px 0px 20px rgba(255, 77, 77, 0.8);  /* Glowing effect */
+        }
+
     </style>
 </head>
 
@@ -109,29 +121,34 @@
 
 <main class="responsive">
     <div class="favorites-list">
-        <ul style="list-style-type: none; padding: 0;">
-            {% for favorite in favorites %}
-                <li class="favorite-item">
-                    <div class="restaurant-info">
-                        <h3>{{ favorite.name }}</h3>
-                        <p><strong>Address:</strong> {{ favorite.address }}</p>
-                    </div>
-                    <button class="remove-btn" onclick="removeFromFavorites('{{ favorite.place_id }}', '{{ favorite.name|escapejs }}')">Remove</button>
-                </li>
-            {% empty %}
-                <li class="favorite-item" style="text-align: center; display: flex; justify-content: center; align-items: center; height: 70px;">
-                    <h3 style="font-size: 1.5em; font-weight: bold; margin: 0;">You don't have any favorite restaurants yet!</h3>
-                </li>
-            {% endfor %}
-        </ul>
+        <article class="responsive large-padding center pink1 large-round" style="opacity:1">
+            <ul style="list-style-type: none; padding: 0;">
+                {% for favorite in favorites %}
+                    <li class="large-round favorite-item">
+                        <div class="restaurant-info">
+                            <h3>{{ favorite.name }}</h3>
+                            <p><strong>Address:</strong> {{ favorite.address }}</p>
+                        </div>
+                        <button class="chip round remove-btn" onclick="removeFromFavorites('{{ favorite.place_id }}', '{{ favorite.name|escapejs }}')">Remove</button>
+                    </li>
+                {% empty %}
+                    <li class="large-round favorite-item" style="text-align: center; display: flex; justify-content: center; align-items: center; height: 70px; padding: 100px; flex-direction: column">
+                        <h3 style="font-size: 1.8em; font-weight: bold; margin: 0; line-height: 1.5">
+                            You don't have any favorite restaurants yet,
+                            add some restaurants in the
+                            <a href="/foodFind/map/" class="link">Map</a> page!
+                        </h3>
+                    </li>
+                {% endfor %}
+            </ul>
 
-        {% if favorites %}
-            <div style="text-align: center;">
-                <button class="remove-all-btn" onclick="removeAllFavorites()">Remove all Favorites</button>
-            </div>
-        {% endif %}
+            {% if favorites %}
+                <div style="text-align: center;">
+                    <button class="large-round remove-all-btn" onclick="removeAllFavorites()">Remove all Favorites</button>
+                </div>
+            {% endif %}
+        </article>
     </div>
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
     <script>
         function removeFromFavorites(place_id, name) {
