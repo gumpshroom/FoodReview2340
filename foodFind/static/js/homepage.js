@@ -121,8 +121,6 @@ async function submitSearch() {
         places.forEach(async (place) => {
             console.log(place.displayName)
 
-            const safeDisplayName = place.displayName.replace(/'/g, "\\'");
-
             var editorial = place.editorialSummary
             if (!place.editorialSummary) {
                 editorial = await fetch("/generateDescription?restaurantName=" + place.displayName + "&restaurantType=" + place.primaryTypeDisplayName).then(response => response.text())
@@ -183,7 +181,7 @@ async function submitSearch() {
 <div class="s1 m4 l6 right-align">
                                 <button class="round">View in Map</button>
                                 <br><br>
-                                <button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}')">Add to Favorites</button>
+                                <button class="border round" onclick="addToFavorites('${place.id}', '${place.displayName}', '${place.rating}')">Add to Favorites</button>
                             </div>
                             <hr>
                             <div class="s1 m12 l12">
