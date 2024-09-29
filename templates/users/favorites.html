@@ -1,9 +1,17 @@
 {% block content %}
-    <h1>User Login</h1>
-    <form class="form-with-validation" action="/users/login/" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <button type="submit">Log In</button>
-    </form>
-    <a href="/users/register/" class="btn-register">Register for an Account</a>
+    <h1>Your Favorite Restaurants</h1>
+
+    <ul>
+        {% for favorite in favorites %}
+            <li>
+                <h3>{{ favorite.name }}</h3>
+                <p>Address: {{ favorite.address }}</p>
+                <p>Vicinity: {{ favorite.vicinity }}</p>
+                <p>Rating: {{ favorite.rating }}</p>
+                <p>Cuisine: {{ favorite.cuisine }}</p>
+            </li>
+        {% empty %}
+            <p>You don't have any favorite restaurants yet!</p>
+        {% endfor %}
+    </ul>
 {% endblock %}
