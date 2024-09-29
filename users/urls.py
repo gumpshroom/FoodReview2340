@@ -12,4 +12,3 @@ urlpatterns = [
     path('removeFavorites/', views.remove_from_favorites_view, name='remove-from-favorites'),
     path('removeAllFavorites/', views.remove_all_favorites_view, name='remove-all'),
 ]
-
