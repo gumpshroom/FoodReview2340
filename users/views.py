@@ -6,19 +6,30 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-
+from django.contrib import messages
 from users.forms import CustomUserCreationForm
 from users.models import Favorite
 
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            login(request, form.save())
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Registration successful!')
             return redirect('/foodFind/')
+        else:
+            # Collect all errors into one array
+            errors = []
+            for field, field_errors in form.errors.items():
+                errors.extend(field_errors)
+            # Join all errors into one message
+            error_message = ' '.join(errors)
+            messages.error(request, error_message)
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
+
     return render(request, 'users/register.html', {'form': form})
 
 def login_view(request):
