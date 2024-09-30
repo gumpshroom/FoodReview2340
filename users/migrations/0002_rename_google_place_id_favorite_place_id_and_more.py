@@ -12,22 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RenameField(
             model_name='favorite',
-            old_name='google_place_id',
-            new_name='place_id',
-        ),
-        migrations.AddField(
-            model_name='favorite',
-            name='cuisine',
-            field=models.CharField(blank=True, max_length=255, null=True),
-        ),
-        migrations.AddField(
-            model_name='favorite',
-            name='rating',
-            field=models.DecimalField(blank=True, decimal_places=1, max_digits=3, null=True),
-        ),
-        migrations.AddField(
-            model_name='favorite',
-            name='vicinity',
-            field=models.CharField(blank=True, max_length=255, null=True),
+            old_name='place_id',
+            new_name='google_place_id',
         ),
     ]
