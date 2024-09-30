@@ -1,17 +1,216 @@
-{% block content %}
-    <h1>Your Favorite Restaurants</h1>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <ul>
-        {% for favorite in favorites %}
-            <li>
-                <h3>{{ favorite.name }}</h3>
-                <p>Address: {{ favorite.address }}</p>
-                <p>Vicinity: {{ favorite.vicinity }}</p>
-                <p>Rating: {{ favorite.rating }}</p>
-                <p>Cuisine: {{ favorite.cuisine }}</p>
-            </li>
-        {% empty %}
-            <p>You don't have any favorite restaurants yet!</p>
-        {% endfor %}
-    </ul>
-{% endblock %}
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet"/>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
+    <script type="module"
+            src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+
+    <title>Your Favorite Restaurants</title>
+    <style>
+        body {
+            background-image: url("{% static 'images/background.png' %}");
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .top-right {
+            display: flex;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .favorites-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .favorite-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px 20px 10px 50px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .favorite-item h3 {
+            margin-top: 0;
+        }
+
+        .remove-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 20px;
+        }
+
+        .remove-btn:hover {
+            background-color: #e60000;
+        }
+
+        .remove-all-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .remove-all-btn:hover {
+            background-color: #e60000;
+        }
+
+        .restaurant-info {
+            flex-grow: 1;
+        }
+
+        .link {
+            text-decoration: none;  /* No underline initially */
+            transition: all 0.3s ease;  /* Smooth transition effect */
+        }
+
+        .link:hover {
+            text-decoration: underline;  /* Underline on hover */
+            color: pink;  /* Keep the color */
+            text-shadow: 0px 0px 20px rgba(255, 77, 77, 0.8);  /* Glowing effect */
+        }
+
+    </style>
+</head>
+
+<body class="light">
+<nav class="top pink2">
+    <a href="/foodFind/map/">
+        <i>map</i>
+        <div>Map</div>
+    </a>
+    <h5 class="max center-align">Your Favorite Restaurants</h5>
+
+    {% if user.is_authenticated %}
+        <a href="/foodFind/">
+            <i>search</i>
+            <div>Search</div>
+        </a>
+        <a href="/users/logout/">
+            <i>logout</i>
+            <div>Logout</div>
+        </a>
+    {% else %}
+        <a href="/foodFind/">
+            <i>search</i>
+            <div>Search</div>
+        </a>
+    {% endif %}
+</nav>
+
+<main class="responsive">
+    <div class="favorites-list">
+        <article class="responsive large-padding center pink1 large-round" style="opacity:1">
+            <ul style="list-style-type: none; padding: 0;">
+                {% for favorite in favorites %}
+                    <li class="large-round favorite-item">
+                        <div class="restaurant-info">
+                            <h3>{{ favorite.name }}</h3>
+                            <p><strong>Address:</strong> {{ favorite.address }}</p>
+                        </div>
+                        <button class="chip round remove-btn" onclick="removeFromFavorites('{{ favorite.place_id }}', '{{ favorite.name|escapejs }}')">Remove</button>
+                    </li>
+                {% empty %}
+                    <li class="large-round favorite-item" style="text-align: center; display: flex; justify-content: center; align-items: center; height: 70px; padding: 100px; flex-direction: column">
+                        <h3 style="font-size: 1.8em; font-weight: bold; margin: 0; line-height: 1.5">
+                            You don't have any favorite restaurants yet,
+                            add some restaurants in the
+                            <a href="/foodFind/map/" class="link">Map</a> page!
+                        </h3>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if favorites %}
+                <div style="text-align: center;">
+                    <button class="large-round remove-all-btn" onclick="removeAllFavorites()">Remove all Favorites</button>
+                </div>
+            {% endif %}
+        </article>
+    </div>
+
+    <script>
+        function removeFromFavorites(place_id, name) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/users/removeFavorites/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    'place_id': place_id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`${name} has been removed from your favorites!`);
+                    location.reload();  // Reload the page to update the list
+                } else if (data.message === 'Favorite not found.') {
+                    alert(`${name} is not in your favorites.`);
+                } else {
+                    alert('An error occurred. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while removing from favorites. Please try again.');
+            });
+        }
+
+        function removeAllFavorites() {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            if (confirm('Are you sure you want to remove all favorites?')) {
+                fetch('/users/removeAllFavorites/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('All favorites have been removed!');
+                        location.reload();  // Reload the page to update the list
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing all favorites. Please try again.');
+                });
+            }
+        }
+    </script>
+
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+</main>
+
+</body>
+</html>
