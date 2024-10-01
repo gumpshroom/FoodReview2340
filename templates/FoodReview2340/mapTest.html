@@ -18,9 +18,9 @@
             background-repeat: no-repeat;
             background-size: cover;
         }
-        
+
         :root {
-    --pink1: #ff69b4; /* Replace with your desired pink color */
+            --pink1: #ff69b4; /* Replace with your desired pink color */
         }
 
         .top {
@@ -50,6 +50,9 @@
         #map {
             height: 600px;
             width: 100%;
+            border: 5px solid white; /* Add white border */
+            border-radius: 7px; /* Optional: rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: subtle shadow */
         }
 
         .search-container {
@@ -189,7 +192,8 @@
                     const infoWindowContent = `
                         <div>
                             {% if user.is_authenticated %}
-                                
+
+
                         ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
                                 <h3>${place.name}</h3>
                                 <p>${place.vicinity}</p>
@@ -199,12 +203,12 @@
                                 <p><strong>Website:</strong> ${website}</p>
                                 <p><strong>Phone Number:</strong> ${phoneNumber}</p>
                                 <p>>${description}</p>
-                                <button onclick="addToFavorites('${place.place_id}', '${place.name.replace(/'/g, "\\'")}
-                        ', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
+                                <button onclick="addToFavorites('${place.place_id}', '${place.name.replace(/'/g, "\\'")}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
                                 <button onclick="removeFromFavorites('${place.place_id}', '
                         ${place.name.replace(/'/g, "\\'")}')">Remove from Favorites</button>
                             {% else %}
-                                
+
+
                         ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
                                 <h3>${place.name}</h3>
                                 <p>${place.vicinity}</p>
@@ -341,11 +345,13 @@
 {#    </button>#}
 {#</div>#}
 
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
 <!-- Map container -->
 <div id="map"></div>
 
 <!-- Input field for radius -->
-<label for="radius" class = "white-text">Radius (km):</label>
+<label for="radius" class="white-text">Radius (km):</label>
 <input type="number" id="radius" name="radius" placeholder="Enter radius in km">
 <button onclick="updateRadius()">Update Radius</button>
 
