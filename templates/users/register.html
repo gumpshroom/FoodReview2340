@@ -11,6 +11,7 @@
                 src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
         <title>ATL Food Finder</title>
         <style>
+
             .top-right {
                 display: flex;
                 position: absolute;
@@ -27,36 +28,6 @@
                 background-image: url("{% static 'images/background.png' %}");
                 background-repeat: no-repeat;
                 background-size: cover;
-            }
-
-            /* Styling for the alert messages */
-            .alert {
-                margin-top: 10px;
-                padding: 10px;
-                background-color: #f44336; /* Red background */
-                color: white; /* White text */
-                opacity: 1;
-                transition: opacity 0.6s; /* Fade out effect */
-                border-radius: 5px;
-            }
-
-            .alert.success {
-                background-color: #4CAF50; /* Green background for success */
-            }
-
-            .alert-close {
-                margin-left: 15px;
-                color: white;
-                font-weight: bold;
-                float: right;
-                font-size: 22px;
-                line-height: 20px;
-                cursor: pointer;
-                transition: 0.3s;
-            }
-
-            .alert-close:hover {
-                color: black;
             }
 
         </style>
@@ -91,74 +62,40 @@
                     <div class="responsive tiny-height"></div>
                     <h3 class="center-align middle-align">Register for an account</h3>
                     <p>or <a href="/users/login/" class="btn-register link">login</a></p>
-
-                    <!-- Display Django messages here -->
-                    {% if messages %}
-                        <div id="alert-box">
-                            {% for message in messages %}
-                                <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
-                                    <span class="alert-close" onclick="this.parentElement.style.display='none';">&times;</span>
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
                 </div>
                 </div>
 
                 <div class="s6">
-                    <form class="form-with-validation" action="/users/register/" method="post" id="registerform">
-                    {% csrf_token %}
-                    <div class="field label prefix border">
-                        <i>person</i>
-                        <input type="text" name="username" required id="id_username" placeholder=" ">
-                        <label>Username</label>
-                    </div>
-                    <div class="field label prefix border">
-                        <i>email</i>
-                        <input type="email" name="email" required id="id_email" placeholder=" ">
-                        <label>Email</label>
-                    </div>
-                    <div class="field label prefix border">
-                        <i>person</i>
-                        <input type="text" name="first_name" required id="id_first_name" placeholder=" ">
-                        <label>First Name</label>
-                    </div>
-                    <div class="field label prefix border">
-                        <i>person</i>
-                        <input type="text" name="last_name" required id="id_last_name" placeholder=" ">
-                        <label>Last Name</label>
-                    </div>
-                    <div class="field label prefix border">
-                        <i>key</i>
-                        <input type="password" name="password1" required id="id_password1" placeholder=" ">
-                        <label>Password</label>
-                    </div>
-                    <div class="field label prefix border">
-                        <i>key</i>
-                        <input type="password" name="password2" required id="id_password2" placeholder=" ">
-                        <label>Confirm Password</label>
-                    </div>
-                    <button type="submit">Register</button>
-                    </form>
-                </div>
+        <form class="form-with-validation" action="/users/register/" method="post" id="registerform">
+        {% csrf_token %}
+        <div class="field label prefix border">
+            <i>person</i>
+            <input type="text" name="username" required id="id_username" placeholder=" ">
+            <label>Username</label>
+        </div>
+        <div class="field label prefix border">
+            <i>key</i>
+            <input type="password" name="password" required id="id_password1" placeholder=" ">
+            <label>Password</label>
+        </div>
+        <button type="submit">Register</button>
+        <script>
+            document.getElementById("registerform").onsubmit = function(e) {
+                e.preventDefault();
+                location.href = "../login/";
+            };
+        </script>
+    </form>
+
+            </div>
+
             </div>
         </div>
     </article>
 </div>
 
-    </main>
 
-    <script>
-        // Hide alert after 5 seconds
-        setTimeout(function() {
-            var alertBox = document.getElementById('alert-box');
-            if (alertBox) {
-                alertBox.style.display = 'none';
-            }
-        }, 5000);
-    </script>
+    </main>
     </body>
 
 {% endblock %}

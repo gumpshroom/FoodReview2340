@@ -4,11 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet"/>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
-    <script type="module"
-            src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <title>Map</title>
     <style>
         body {
@@ -17,48 +12,6 @@
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-        }
-
-        :root {
-            --pink1: #ff69b4; /* Replace with your desired pink color */
-        }
-
-        .top {
-            background-color: var(--pink1); /* Use BeerCSS pink color */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-        }
-
-        .top a {
-            color: black; /* Change the color to match your theme */
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        .max {
-            margin: 0;
-            font-size: 20px; /* Adjust the font size as needed */
-        }
-
-        .center-align {
-            text-align: center;
-            flex: 1; /* Take up the remaining space */
-        }
-
-        #map {
-            height: 600px;
-            width: 100%;
-            border: 5px solid white; /* Add white border */
-            border-radius: 7px; /* Optional: rounded corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: subtle shadow */
-        }
-
-        .search-container {
-            display: flex;
-            justify-content: flex-end;
-            margin: 10px;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ&libraries=places"></script>
@@ -150,12 +103,10 @@
                 }
             });
         }
-
         function clearMarkers() {
             markers.forEach(marker => marker.setMap(null));
             markers = [];
         }
-
         function getPlaceDetails(placeId, marker) {
             const request = {
                 placeId: placeId,
@@ -178,10 +129,9 @@
 
                         return 'Cuisine type not available';  // Fallback if no match is found
                     }
-
                     let photoUrl = '';
                     if (place.photos && place.photos.length > 0) {
-                        photoUrl = place.photos[0].getUrl({maxWidth: 300, maxHeight: 300});
+                        photoUrl = place.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 });
                     }
 
                     const cuisineType = getCuisineFromNameOrDescription(place);
@@ -192,9 +142,7 @@
                     const infoWindowContent = `
                         <div>
                             {% if user.is_authenticated %}
-
-
-                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
                                 <h3>${place.name}</h3>
                                 <p>${place.vicinity}</p>
                                 <p>${cuisineType}</p>
@@ -204,12 +152,9 @@
                                 <p><strong>Phone Number:</strong> ${phoneNumber}</p>
                                 <p>>${description}</p>
                                 <button onclick="addToFavorites('${place.place_id}', '${place.name.replace(/'/g, "\\'")}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
-                                <button onclick="removeFromFavorites('${place.place_id}', '
-                        ${place.name.replace(/'/g, "\\'")}')">Remove from Favorites</button>
+                                <button onclick="removeFromFavorites('${place.place_id}', '${place.name.replace(/'/g, "\\'")}')">Remove from Favorites</button>
                             {% else %}
-
-
-                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
                                 <h3>${place.name}</h3>
                                 <p>${place.vicinity}</p>
                                 <p>${cuisineType}</p>
@@ -290,68 +235,35 @@
                     'place_id': place_id
                 })
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`${name} has been removed from your favorites!`);
-                        location.reload();
-                    } else if (data.message === 'Favorite not found.') {
-                        alert(`${name} is not in your favorites.`);
-                    } else {
-                        alert('An error occurred. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    alert('An error occurred while removing from favorites. Please try again.');
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`${name} has been removed from your favorites!`);
+                    location.reload();
+                } else if (data.message === 'Favorite not found.') {
+                    alert(`${name} is not in your favorites.`);
+                } else {
+                    alert('An error occurred. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while removing from favorites. Please try again.');
+            });
         }
+
     </script>
+
 </head>
 <body onload="initMap()">
-
-<nav class="top pink2">
-    <a href="/foodFind/">
-        <i>Search</i>
-        <div>Search</div>
-    </a>
-    <h5 class="max center-align">Restaurants in Atlanta</h5>
-
-    {% if user.is_authenticated %}
-        <div class="top-right">
-            <a href="/users/favorites/">
-                <i>star</i>
-                <div>Favorites</div>
-            </a>
-            <a href="/users/logout/">
-                <i>logout</i>
-                <div>Logout</div>
-            </a>
-        </div>
-    {% else %}
-        <div class="top-right">
-            <a href="/users/login/">
-                <i>login</i>
-                <div>Login</div>
-            </a>
-        </div>
-    {% endif %}
-</nav>
-
-<!-- Search Bar -->
-{#<div class="search-container">#}
-{#    <input type="text" placeholder="Search..." id="searchInput" class="searchbar">#}
-{#    <button class="button" onclick="submitSearch()">#}
-{#        <i>search</i>#}
-{#    </button>#}
-{#</div>#}
+<h1>Restaurants in Atlanta</h1>
 
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
 <!-- Map container -->
-<div id="map"></div>
+<div id="map" style="height: 500px; width: 100%;"></div>
 
 <!-- Input field for radius -->
-<label for="radius" class="white-text">Radius (km):</label>
+<label for="radius">Radius (km):</label>
 <input type="number" id="radius" name="radius" placeholder="Enter radius in km">
 <button onclick="updateRadius()">Update Radius</button>
 
