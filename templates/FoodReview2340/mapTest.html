@@ -1,20 +1,75 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Places API Example</title>
-{#    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>#}
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ
-    &libraries=places"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet"/>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
+    <script type="module"
+            src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <title>Map</title>
+    <style>
+        body {
+            background-image: url("{% static 'images/background.png' %}");
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        :root {
+            --pink1: #ff69b4; /* Replace with your desired pink color */
+        }
+
+        .top {
+            background-color: var(--pink1); /* Use BeerCSS pink color */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        .top a {
+            color: black; /* Change the color to match your theme */
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .max {
+            margin: 0;
+            font-size: 20px; /* Adjust the font size as needed */
+        }
+
+        .center-align {
+            text-align: center;
+            flex: 1; /* Take up the remaining space */
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+            border: 5px solid white; /* Add white border */
+            border-radius: 7px; /* Optional: rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: subtle shadow */
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ&libraries=places"></script>
     <script>
         let map;
         let service;
-        let currentInfoWindow = null;  // To track the currently open info window
-        let markers = []; // To keep track of all the markers
+        let currentInfoWindow = null;
+        let markers = [];
+        let pagination = null; // To track pagination
 
         function initMap() {
-            // Try HTML5 geolocation.
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     function (position) {
@@ -23,19 +78,14 @@
                             lng: position.coords.longitude,
                         };
 
-                        // Initialize the map centered on the user's location
                         map = new google.maps.Map(document.getElementById('map'), {
                             center: userLocation,
                             zoom: 15,
                         });
 
-                        // Initialize the Places service
                         service = new google.maps.places.PlacesService(map);
+                        performSearch(1000);
 
-                        // Perform an initial search with default radius
-                        performSearch(1000);  // Default radius: 1000 meters
-
-                        // Add a marker at the user's location
                         new google.maps.Marker({
                             position: userLocation,
                             map: map,
@@ -50,7 +100,6 @@
                     }
                 );
             } else {
-                // Browser doesn't support Geolocation
                 handleLocationError(false, map.getCenter());
             }
         }
@@ -63,21 +112,18 @@
             );
         }
 
-        // Function to perform a nearby search with the given radius
         function performSearch(radius) {
             const userLocation = map.getCenter();
-
             const request = {
                 location: userLocation,
                 radius: radius,
                 type: ['restaurant'],
-                fields: ['place_id', 'name', 'vicinity', 'rating']  // Ensure 'place_id' is included
+                fields: ['place_id', 'name', 'vicinity', 'rating']
             };
 
-            // Clear existing markers from the map
             clearMarkers();
 
-            service.nearbySearch(request, (results, status) => {
+            service.nearbySearch(request, (results, status, pag) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
                     results.forEach(place => {
                         const marker = new google.maps.Marker({
@@ -87,11 +133,14 @@
                         });
 
                         markers.push(marker);
-
-                        // Call function to get place details (including description and photo)
-                        getPlaceDetails(place.place_id, marker);  // Ensure place.place_id is passed correctly
+                        getPlaceDetails(place.place_id, marker);
                     });
-
+                    if (pag.hasNextPage) {
+                        pagination = pag;
+                        setTimeout(() => pagination.nextPage(), 100); // timeout to handle errors if any
+                    } else {
+                        pagination = null; // No more pages available
+                    }
                     map.addListener('click', () => {
                         if (currentInfoWindow) {
                             currentInfoWindow.close();
@@ -108,44 +157,67 @@
         }
 
         function getPlaceDetails(placeId, marker) {
-            // Function to get place details (including description and photo)
-            // Implement this function based on your requirements
-        }
-
-        // Function to get details of a place (including the description and photo)
-        function getPlaceDetails(placeId, marker) {
             const request = {
                 placeId: placeId,
-                fields: ['name', 'vicinity', 'rating', 'place_id', 'user_ratings_total', 'editorial_summary', 'photos']  // Added 'place_id' here
+                fields: ['name', 'vicinity', 'rating', 'place_id', 'user_ratings_total', 'editorial_summary', 'photos', 'international_phone_number', "website", "types"]
             };
-
             service.getDetails(request, (place, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
+                    function getCuisineFromNameOrDescription(place) {
+                        const keywords = /(fast food|american|chinese|italian|mexican|indian|japanese|korean|thai|mediterranean|snack)/i;
+
+                        // Check in place name
+                        if (keywords.test(place.name)) {
+                            return place.name.match(keywords)[0];  // Return the matched cuisine type
+                        }
+
+                        // Check in editorial summary (description) if available
+                        if (place.editorial_summary && keywords.test(place.editorial_summary.overview)) {
+                            return place.editorial_summary.overview.match(keywords)[0];  // Return the matched cuisine type
+                        }
+
+                        return 'Cuisine type not available';  // Fallback if no match is found
+                    }
 
                     let photoUrl = '';
                     if (place.photos && place.photos.length > 0) {
-                        photoUrl = place.photos[0].getUrl({ maxWidth: 300, maxHeight: 300 });
+                        photoUrl = place.photos[0].getUrl({maxWidth: 300, maxHeight: 300});
                     }
 
-                    // Ensure place_id is available and passed into the addToFavorites function
+                    const cuisineType = getCuisineFromNameOrDescription(place);
+                    const phoneNumber = place.international_phone_number || 'No phone number available';
+                    const website = place.website || 'No website available';
+                    const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
+
                     const infoWindowContent = `
                         <div>
                             {% if user.is_authenticated %}
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+
+
+                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
                                 <h3>${place.name}</h3>
                                 <p>${place.vicinity}</p>
+                                <p>${cuisineType}</p>
                                 <p>Rating: ${place.rating || 'No rating available'}</p>
                                 <p>${place.user_ratings_total || 'No'} reviews</p>
-                                <p>${description}</p>
-                                <button onclick="addToFavorites('${place.place_id}', '${place.name.replace(/'/g, "\\'")}', '${place.rating}')">Add to Favorites</button>
+                                <p><strong>Website:</strong> ${website}</p>
+                                <p><strong>Phone Number:</strong> ${phoneNumber}</p>
+                                <p>>${description}</p>
+                                <button onclick="addToFavorites('${place.place_id}', '${place.name.replace(/'/g, "\\'")}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
+                                <button onclick="removeFromFavorites('${place.place_id}', '
+                        ${place.name.replace(/'/g, "\\'")}')">Remove from Favorites</button>
                             {% else %}
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
+
+
+                        ${photoUrl ? `<img src="${photoUrl}" alt="${place.name}" style="max-width: 80%; height: auto;">` : ''}
                                 <h3>${place.name}</h3>
                                 <p>${place.vicinity}</p>
+                                <p>${cuisineType}</p>
                                 <p>Rating: ${place.rating || 'No rating available'}</p>
                                 <p>${place.user_ratings_total || 'No'} reviews</p>
-                                <p>${description}</p>
+                                <p><strong>Website:</strong> ${website}</p>
+                                <p><strong>Phone Number:</strong> ${phoneNumber}</p>
+                                <p>>${description}</p>
                             {% endif %}
                         </div>
                     `;
@@ -165,24 +237,15 @@
             });
         }
 
-        // Function to clear all markers from the map
-        function clearMarkers() {
-            for (let i = 0; i < markers.length; i++) {
-                markers[i].setMap(null);
-            }
-            markers = [];
-        }
-
-        // Function to handle radius change and re-perform the search
         function updateRadius() {
             const newRadius = document.getElementById('radius').value;
             if (newRadius) {
-                performSearch(parseInt(newRadius) * 1000);  // Convert km to meters
+                performSearch(parseInt(newRadius) * 1000);
             }
         }
 
-        function addToFavorites(place_id, name, rating) {
-            console.log('Adding to favorites:', place_id, name, rating);  // Debugging log
+        function addToFavorites(place_id, name, rating, address) {
+            console.log('Adding to favorites:', place_id, name, rating);
 
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -195,12 +258,12 @@
                 body: JSON.stringify({
                     'place_id': place_id,
                     'name': name,
+                    'address': address,
                     'rating': rating,
                 })
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);  // Debugging log
                     if (data.success) {
                         alert(`${name} has been added to your favorites!`);
                     } else {
@@ -208,26 +271,89 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     alert('An error occurred while adding to favorites. Please try again.');
                 });
         }
 
-    </script>
+        function removeFromFavorites(place_id, name) {
+            console.log('Removing from favorites:', place_id);
 
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch('/users/removeFavorites/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    'place_id': place_id
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${name} has been removed from your favorites!`);
+                        location.reload();
+                    } else if (data.message === 'Favorite not found.') {
+                        alert(`${name} is not in your favorites.`);
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred while removing from favorites. Please try again.');
+                });
+        }
+    </script>
 </head>
 <body onload="initMap()">
-<h1>Restaurants in Atlanta</h1>
+
+<nav class="top pink2">
+    <a href="/foodFind/">
+        <i>Search</i>
+        <div>Search</div>
+    </a>
+    <h5 class="max center-align">Restaurants in Atlanta</h5>
+
+    {% if user.is_authenticated %}
+        <div class="top-right">
+            <a href="/users/favorites/">
+                <i>star</i>
+                <div>Favorites</div>
+            </a>
+            <a href="/users/logout/">
+                <i>logout</i>
+                <div>Logout</div>
+            </a>
+        </div>
+    {% else %}
+        <div class="top-right">
+            <a href="/users/login/">
+                <i>login</i>
+                <div>Login</div>
+            </a>
+        </div>
+    {% endif %}
+</nav>
+
+<!-- Search Bar -->
+{#<div class="search-container">#}
+{#    <input type="text" placeholder="Search..." id="searchInput" class="searchbar">#}
+{#    <button class="button" onclick="submitSearch()">#}
+{#        <i>search</i>#}
+{#    </button>#}
+{#</div>#}
 
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
 <!-- Map container -->
-<div id="map" style="height: 500px; width: 100%;"></div>
+<div id="map"></div>
 
 <!-- Input field for radius -->
-<label for="radius">Radius (km):</label>
+<label for="radius" class="white-text">Radius (km):</label>
 <input type="number" id="radius" name="radius" placeholder="Enter radius in km">
-<button onclick="updateRadius()">Update Radius</button> <!-- Button to trigger radius update -->
+<button onclick="updateRadius()">Update Radius</button>
 
 </body>
 </html>
