@@ -63,8 +63,8 @@ function doReviews(reviews) {
     return output + "</div>"
 }
 
-function addToFavorites(place_id, name, rating) {
-    console.log('Adding to favorites:', place_id, name, rating);  // Debugging log
+function addToFavorites(place_id, name, rating, address) {
+    console.log('Adding to favorites:', place_id, name, rating);
 
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -77,12 +77,12 @@ function addToFavorites(place_id, name, rating) {
         body: JSON.stringify({
             'place_id': place_id,
             'name': name,
+            'address': address,
             'rating': rating,
         })
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data);  // Debugging log
             if (data.success) {
                 alert(`${name} has been added to your favorites!`);
             } else {
@@ -90,7 +90,6 @@ function addToFavorites(place_id, name, rating) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             alert('An error occurred while adding to favorites. Please try again.');
         });
 }
@@ -183,7 +182,7 @@ async function submitSearch() {
 <div class="s1 m4 l6 right-align">
                                 <button class="round">View in Map</button>
                                 <br><br>
-                                <button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}')">Add to Favorites</button>
+                                <button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
                             </div>
                             <hr>
                             <div class="s1 m12 l12">
