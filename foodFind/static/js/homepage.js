@@ -182,7 +182,7 @@ async function submitSearch() {
 <div class="s1 m4 l6 right-align">
                                 <button class="round">View in Map</button>
                                 <br><br>
-                                <button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
+                                ${isAuthenticated ? `<button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>` : ''}
                             </div>
                             <hr>
                             <div class="s1 m12 l12">
