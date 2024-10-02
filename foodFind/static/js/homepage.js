@@ -93,7 +93,13 @@ function addToFavorites(place_id, name, rating, address) {
             alert('An error occurred while adding to favorites. Please try again.');
         });
 }
+let selectedPriceLevel = null;
 
+// Function to update selected price level
+function filterByPrice(priceLevel) {
+    selectedPriceLevel = priceLevel;  // Set the selected price level
+    submitSearch();
+}
 async function submitSearch() {
     //get custom filters and stuff
     const {Place} = await google.maps.importLibrary("places");
@@ -111,13 +117,20 @@ async function submitSearch() {
         region: "us",
         useStrictTypeFiltering: false,
     };
-
+    if (selectedPriceLevel !== null) {
+        request.priceLevel = selectedPriceLevel;
+    }
     const {places} = await Place.searchByText(request);
     if (places.length) {
         console.log(places)
         document.getElementById('results').innerHTML = ""
-
-        places.forEach(async (place) => {
+    var sorted = Array.from(places);
+    sorted.sort();
+    renderResults(places);
+    }
+}
+function renderResults(places) {
+            places.forEach(async (place) => {
             console.log(place.displayName)
 
             const safeDisplayName = place.displayName.replace(/'/g, "\\'");
@@ -224,9 +237,8 @@ async function submitSearch() {
             });
 
         });
-    }
-}
 
+}
 function viewInMap(place_id) {
     // Redirect to the map page with the place_id as a query parameter
     window.location.href = `/foodFind/map/?place_id=${place_id}`;
