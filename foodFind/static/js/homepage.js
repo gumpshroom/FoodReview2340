@@ -180,9 +180,9 @@ async function submitSearch() {
                                 <h6 class="small-text left-align gray">${(!place.priceLevel || place.priceLevel.charAt(0) === "F" || place.priceLevel.charAt(0) === "I") ? "$" : (place.priceLevel.charAt(0) === "M") ? "$$" : "$$$"} · ${place.priceLevel ? place.priceLevel.toLowerCase() : "no price data"}</h6>
 </div>
 <div class="s1 m4 l6 right-align">
-                                <button class="round">View in Map</button>
+                                <button class="round" onclick="viewInMap('${place.id}')">View in Map</button>
                                 <br><br>
-                                <button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
+                                ${isAuthenticated ? `<button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>` : ''}
                             </div>
                             <hr>
                             <div class="s1 m12 l12">
@@ -224,4 +224,9 @@ async function submitSearch() {
 
         });
     }
+}
+
+function viewInMap(place_id) {
+    // Redirect to the map page with the place_id as a query parameter
+    window.location.href = `/foodFind/map/?place_id=${place_id}`;
 }

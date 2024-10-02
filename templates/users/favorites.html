@@ -62,6 +62,20 @@
             background-color: #e60000;
         }
 
+        .view-in-map-btn {
+            background-color: #6854a4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 20px;
+        }
+
+        .view-in-map-btn:hover {
+            background-color: #7864ac;
+        }
+
         .remove-all-btn {
             background-color: #ff4d4d;
             color: white;
@@ -89,6 +103,22 @@
             text-decoration: underline;  /* Underline on hover */
             color: pink;  /* Keep the color */
             text-shadow: 0px 0px 20px rgba(255, 77, 77, 0.8);  /* Glowing effect */
+        }
+
+        div button {
+            display: block;       /* Make the buttons stack vertically */
+            margin-bottom: 8px;   /* Adjust the bottom margin for spacing */
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;    /* Stack the buttons vertically */
+            align-items: center;       /* Center the buttons horizontally */
+        }
+
+        .button-container button {
+            margin-bottom: 10px;       /* Add space between buttons */
+            width: 150px;              /* Ensure the buttons have the same width (optional) */
         }
 
     </style>
@@ -127,9 +157,12 @@
                     <li class="large-round favorite-item">
                         <div class="restaurant-info">
                             <h3>{{ favorite.name }}</h3>
-                            <p><strong>Address:</strong> {{ favorite.address }}</p>
+{#                            <p><strong>Address:</strong> {{ favorite.address }}</p>#}
                         </div>
-                        <button class="chip round remove-btn" onclick="removeFromFavorites('{{ favorite.place_id }}', '{{ favorite.name|escapejs }}')">Remove</button>
+                        <div class="button-container">
+                            <button class="chip round view-in-map-btn" onclick="viewInMap('{{ favorite.place_id }}')">View in Map</button>
+                            <button class="chip round remove-btn" onclick="removeFromFavorites('{{ favorite.place_id }}', '{{ favorite.name|escapejs }}')">Remove</button>
+                        </div>
                     </li>
                 {% empty %}
                     <li class="large-round favorite-item" style="text-align: center; display: flex; justify-content: center; align-items: center; height: 70px; padding: 100px; flex-direction: column">
@@ -206,6 +239,11 @@
                     alert('An error occurred while removing all favorites. Please try again.');
                 });
             }
+        }
+
+        function viewInMap(place_id) {
+            // Redirect to the map page with the place_id as a query parameter
+            window.location.href = `/foodFind/map/?place_id=${place_id}`;
         }
     </script>
 
