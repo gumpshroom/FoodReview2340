@@ -197,9 +197,15 @@
                     const cuisineType = getCuisineFromNameOrDescription(place);
                     const phoneNumber = place.international_phone_number || 'No phone number available';
                     const website = place.website || 'No website available';
-                    const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
+                    async function getDescription(place) {
+                        const response = await fetch("/generateDescription?restaurantName=" + place.name + "&restaurantType=" + place.primaryTypeDisplayName);
+                        const description = await response.text();
+                        return description;
+                    }
+                    marker.addListener('click', async () => {
+                        const description = await fetch("/generateDescription?restaurantName=" + place.name + "&restaurantType=" + place.primaryTypeDisplayName).then(response => response.text())
 
-                    const infoWindowContent = `
+                        const infoWindowContent = `
                         <div>
                             {% if user.is_authenticated %}
 
@@ -235,7 +241,6 @@
                         content: infoWindowContent
                     });
 
-                    marker.addListener('click', () => {
                         if (currentInfoWindow) {
                             currentInfoWindow.close();
                         }
