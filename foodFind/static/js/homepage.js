@@ -93,21 +93,18 @@ function addToFavorites(place_id, name, rating, address) {
             alert('An error occurred while adding to favorites. Please try again.');
         });
 }
-let selectedPriceLevel = null;
 
-// Function to update selected price level
-function filterByPrice(priceLevel) {
-    selectedPriceLevel = priceLevel;  // Set the selected price level
-    submitSearch();
-}
+
 async function submitSearch() {
     //get custom filters and stuff
     const {Place} = await google.maps.importLibrary("places");
 
     var query = document.getElementById('searchInput').value.trim()
+
     const request = {
         textQuery: query,
         fields: ["displayName", "primaryTypeDisplayName", "adrFormatAddress", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "reviews"],
+
         includedType: "restaurant",
         locationBias: {lat: 33.74969690485657, lng: -84.39235565742148},
         isOpenNow: true,
@@ -117,31 +114,46 @@ async function submitSearch() {
         region: "us",
         useStrictTypeFiltering: false,
     };
-    if (selectedPriceLevel !== null) {
-        request.priceLevel = selectedPriceLevel;
-    }
+
     const {places} = await Place.searchByText(request);
     if (places.length) {
         console.log(places)
         document.getElementById('results').innerHTML = ""
-    var sorted = Array.from(places);
-    sorted.sort();
-    renderResults(places);
+        var sorted = places.concat();
+        switch (document.getElementById('sortValue').innerHTML) {
+            case "rating":
+                sorted.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+                break;
+            case "priceLevel":
+                console.log("doin sort")
+                sorted.sort((a, b) => {
+                    if (!a.priceLevel) {
+                        return 1;
+                    }
+                    if (!b.priceLevel) {
+                        return -1;
+                    }
+                    return a.priceLevel.localeCompare(b.priceLevel);
+                });
+                break;
+        }
+        renderResults(sorted);
     }
 }
-function renderResults(places) {
-            places.forEach(async (place) => {
-            console.log(place.displayName)
 
-            const safeDisplayName = place.displayName.replace(/'/g, "\\'");
+async function renderResults(places) {
+    for (var place of places) {
+        console.log(place.displayName)
 
-            var editorial = place.editorialSummary
-            if (!place.editorialSummary) {
-                editorial = await fetch("/generateDescription?restaurantName=" + place.displayName + "&restaurantType=" + place.primaryTypeDisplayName).then(response => response.text())
-            }
-            var AIopinion = await fetch("/summarizeComments?review1=" + (place.reviews.length ? place.reviews[0].text : "nothing") + "&reviewRandom=" + (place.reviews.length ? place.reviews[Math.floor(Math.random() * place.reviews.length)].text : "nothing")).then(response => response.text())
+        const safeDisplayName = place.displayName.replace(/'/g, "\\'");
 
-            var cardTemplate = `
+        var editorial = place.editorialSummary
+        if (!place.editorialSummary) {
+            editorial = await fetch("/generateDescription?restaurantName=" + place.displayName + "&restaurantType=" + place.primaryTypeDisplayName).then(response => response.text())
+        }
+        var AIopinion = await fetch("/summarizeComments?review1=" + (place.reviews.length ? place.reviews[0].text : "nothing") + "&reviewRandom=" + (place.reviews.length ? place.reviews[Math.floor(Math.random() * place.reviews.length)].text : "nothing")).then(response => response.text())
+
+        var cardTemplate = `
 <div class="padding" id="${place.id}">
         <article class="max large-padding center center-align pink1 large-round middle-align auto-width auto-height" style="opacity:0.3">
             <div style="width:100%" class="grid middle-align auto-height max">
@@ -228,17 +240,18 @@ function renderResults(places) {
     </div>
 `
 
-            document.getElementById('results').innerHTML += cardTemplate
-            anime({
-                targets: 'article',
-                opacity: 1,
-                duration: 1000,
-                easing: 'cubicBezier(.5, .05, .1, .3)'
-            });
-
+        document.getElementById('results').innerHTML += cardTemplate
+        anime({
+            targets: 'article',
+            opacity: 1,
+            duration: 1000,
+            easing: 'cubicBezier(.5, .05, .1, .3)'
         });
+    }
+
 
 }
+
 function viewInMap(place_id) {
     // Redirect to the map page with the place_id as a query parameter
     window.location.href = `/foodFind/map/?place_id=${place_id}`;

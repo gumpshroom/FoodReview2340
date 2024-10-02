@@ -89,7 +89,17 @@
                 <a onclick="submitSearch()"><i>arrow_forward</i></a>
 
             </div>
-            <br>
+            <div class="small-padding"></div>
+            <button class="active">
+                <span id="sortLabel">Sort by</span>
+                <i>arrow_drop_down</i>
+                <p style="display:none;" id="sortValue"></p>
+                <menu class="" id="sort">   <!--menu class="hidden"-->
+                <a onclick="document.getElementById('sortLabel').innerHTML = 'Sort by rating';document.getElementById('sortValue').innerHTML='rating';ui('#sort')">Rating</a>
+                <a onclick="document.getElementById('sortLabel').innerHTML = 'Sort by price';document.getElementById('sortValue').innerHTML='priceLevel';ui('#sort')">Price</a>
+
+            </menu>
+            </button>
             <div class="grid">
                 <div class="center-align wrap center s24 m6 l6">
                     <script>
@@ -145,6 +155,10 @@
 
                 </div>
             </div>
+
+
+
+
         </article>
     </div>
     <div id="results"></div>
