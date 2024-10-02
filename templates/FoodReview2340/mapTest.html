@@ -48,8 +48,6 @@
         }
 
         #map {
-            height: 600px;
-            width: 100%;
             border: 5px solid white; /* Add white border */
             border-radius: 7px; /* Optional: rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: subtle shadow */
@@ -117,10 +115,13 @@ function initMap() {
 
                     var boundsDistance = getDistance(map.getBounds().getNorthEast(), map.getBounds().getSouthWest());
                     console.log(boundsDistance);
-                    performSearch(boundsDistance, map.getCenter());
-                    if (pagination) {
-                        pagination.nextPage();
+                    if (window.location.search.length === 0) {
+                        performSearch(boundsDistance, map.getCenter());
+                        if (pagination) {
+                            pagination.nextPage();
+                        }
                     }
+
                 });
 
                 service = new google.maps.places.PlacesService(map);
@@ -161,7 +162,7 @@ function performSearch(radius, center) {
         fields: ['place_id', 'name', 'vicinity', 'rating']
     };
 
-    clearMarkers();
+    {#clearMarkers();#}
 
     service.nearbySearch(request, (results, status, pag) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
@@ -419,12 +420,12 @@ function getPlaceDetails(placeId, marker) {
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
 <!-- Map container -->
-<main id="map"></main>
+<main class="responsive" id="map"></main>
 
 <!-- Input field for radius -->
-<label for="radius" class="white-text">Radius (km):</label>
-<input type="number" id="radius" name="radius" placeholder="Enter radius in km">
-<button onclick="updateRadius()">Update Radius</button>
+{#<label for="radius" class="white-text">Radius (km):</label>#}
+{#<input type="number" id="radius" name="radius" placeholder="Enter radius in km">#}
+{#<button onclick="updateRadius()">Update Radius</button>#}
 
 </body>
 </html>
