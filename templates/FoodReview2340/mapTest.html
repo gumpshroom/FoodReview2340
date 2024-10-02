@@ -83,8 +83,18 @@
                             zoom: 15,
                         });
 
+
+
                         service = new google.maps.places.PlacesService(map);
-                        performSearch(1000);
+                        const placeId = getPlaceIdFromUrl();
+
+                        if (placeId) {
+                            // If place_id is available in the URL, show that specific restaurant
+                            getPlaceDetailsAndShowOnMap(placeId);
+                        } else {
+                            // Perform a general search if no specific place_id is provided
+                            performSearch(1000);
+                        }
 
                         new google.maps.Marker({
                             position: userLocation,
@@ -236,6 +246,26 @@
             });
         }
 
+        function getPlaceDetailsAndShowOnMap(placeId) {
+            const request = {
+                placeId: placeId,
+                fields: ['name', 'vicinity', 'rating', 'geometry', 'place_id', 'user_ratings_total', 'editorial_summary', 'photos', 'international_phone_number', 'website', 'types']
+            };
+
+            service.getDetails(request, (place, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    const marker = new google.maps.Marker({
+                        map: map,
+                        position: place.geometry.location,
+                        title: place.name,
+                    });
+
+                    map.setCenter(place.geometry.location);
+                    getPlaceDetails(placeId, marker);  // Reusing the existing function to create the info window
+                }
+            });
+        }
+
         function updateRadius() {
             const newRadius = document.getElementById('radius').value;
             if (newRadius) {
@@ -304,9 +334,16 @@
                     alert('An error occurred while removing from favorites. Please try again.');
                 });
         }
+
+        function getPlaceIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const placeId = urlParams.get('place_id');
+            console.log(placeId);
+            return urlParams.get('place_id');
+        }
     </script>
 </head>
-<body onload="initMap()">
+<body class="light" onload="initMap()">
 
 <nav class="top pink2">
     <a href="/foodFind/">
@@ -316,23 +353,19 @@
     <h5 class="max center-align">Restaurants in Atlanta</h5>
 
     {% if user.is_authenticated %}
-        <div class="top-right">
-            <a href="/users/favorites/">
-                <i>star</i>
-                <div>Favorites</div>
-            </a>
-            <a href="/users/logout/">
-                <i>logout</i>
-                <div>Logout</div>
-            </a>
-        </div>
+        <a href="/users/favorites/">
+            <i>star</i>
+            <div>Favorites</div>
+        </a>
+        <a href="/users/logout/">
+            <i>logout</i>
+            <div>Logout</div>
+        </a>
     {% else %}
-        <div class="top-right">
-            <a href="/users/login/">
-                <i>login</i>
-                <div>Login</div>
-            </a>
-        </div>
+        <a href="/users/login/">
+            <i>login</i>
+            <div>Login</div>
+        </a>
     {% endif %}
 </nav>
 
