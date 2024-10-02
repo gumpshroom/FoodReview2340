@@ -174,6 +174,8 @@
         // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
         // Add other bootstrap parameters as needed, using camel case.
     });
+
+    var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
 </script>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script src="{% static 'js/anime.min.js' %}"></script>
