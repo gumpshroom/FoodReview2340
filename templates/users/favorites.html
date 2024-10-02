@@ -63,7 +63,7 @@
         }
 
         .view-in-map-btn {
-            background-color: rebeccapurple;
+            background-color: #6854a4;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -73,7 +73,7 @@
         }
 
         .view-in-map-btn:hover {
-            background-color: mediumpurple;
+            background-color: #7864ac;
         }
 
         .remove-all-btn {
@@ -157,7 +157,7 @@
                     <li class="large-round favorite-item">
                         <div class="restaurant-info">
                             <h3>{{ favorite.name }}</h3>
-                            <p><strong>Address:</strong> {{ favorite.address }}</p>
+{#                            <p><strong>Address:</strong> {{ favorite.address }}</p>#}
                         </div>
                         <div class="button-container">
                             <button class="chip round view-in-map-btn" onclick="viewInMap('{{ favorite.place_id }}')">View in Map</button>
