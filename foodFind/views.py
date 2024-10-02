@@ -41,3 +41,18 @@ def summarizeComments(request):
         )
         return HttpResponse(chat_completion.choices[0].message.content)
     else: return HttpResponse("")
+def generateCuisineType(request):
+    if request.method == 'GET' and request.GET.get('restaurantName') and request.GET.get('restaurantType'):
+
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Give a one to two word cuisine type for the restaurant " + request.GET.get('restaurantName') + ", a " + request.GET.get('restaurantType') + " in Atlanta, Georgia. The possible cuisine types include 'Fast Food', 'American', 'Chinese', 'Italian', 'Vietnamese', 'Mexican', 'Indian', 'Japanese', 'Korean', 'Thai', 'Mediterranean',and 'Snacks'. Do not prefix with anything, only output the response."
+                }
+            ],
+            model="llama3-8b-8192",
+        )
+        return HttpResponse(chat_completion.choices[0].message.content)
+    else:
+        return HttpResponse("")
