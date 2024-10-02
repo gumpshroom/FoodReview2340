@@ -204,28 +204,11 @@ function getPlaceDetails(placeId, marker) {
     };
     service.getDetails(request, (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-            function getCuisineFromNameOrDescription(place) {
-                const keywords = /(fast food|american|chinese|italian|mexican|indian|japanese|korean|thai|mediterranean|snack)/i;
-
-                // Check in place name
-                if (keywords.test(place.name)) {
-                    return place.name.match(keywords)[0];  // Return the matched cuisine type
-                }
-
-                // Check in editorial summary (description) if available
-                if (place.editorial_summary && keywords.test(place.editorial_summary.overview)) {
-                    return place.editorial_summary.overview.match(keywords)[0];  // Return the matched cuisine type
-                }
-
-                return 'Cuisine type not available';  // Fallback if no match is found
-            }
-
             let photoUrl = '';
             if (place.photos && place.photos.length > 0) {
                 photoUrl = place.photos[0].getUrl({maxWidth: 300, maxHeight: 300});
             }
 
-                    const cuisineType = getCuisineFromNameOrDescription(place);
                     const phoneNumber = place.international_phone_number || 'No phone number available';
                     const website = place.website || 'No website available';
                     async function getDescription(place) {
@@ -233,8 +216,14 @@ function getPlaceDetails(placeId, marker) {
                         const description = await response.text();
                         return description;
                     }
+                    async function getCuisineType(place) {
+                        const response = await fetch("/generateCuisineType?restaurantName=" + place.name + "&restaurantType=" + place.primaryTypeDisplayName);
+                        const cuisineType = await response.text();
+                        return cuisineType;
+                    }
                     marker.addListener('click', async () => {
-                        const description = await fetch("/generateDescription?restaurantName=" + place.name + "&restaurantType=" + place.primaryTypeDisplayName).then(response => response.text())
+                        const description = await getDescription(place);
+                        const cuisineType = await getCuisineType(place);
 
                     const infoWindowContent = `
                         <div>
