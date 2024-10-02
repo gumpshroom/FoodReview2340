@@ -101,7 +101,7 @@ async function submitSearch() {
     var query = document.getElementById('searchInput').value.trim()
     const request = {
         textQuery: query,
-        fields: ["displayName", "primaryTypeDisplayName", "location", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "reviews"],
+        fields: ["displayName", "primaryTypeDisplayName", "adrFormatAddress", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "reviews"],
         includedType: "restaurant",
         locationBias: {lat: 33.74969690485657, lng: -84.39235565742148},
         isOpenNow: true,
@@ -178,6 +178,7 @@ async function submitSearch() {
                             <h5 class="left-align">${place.rating} stars
                                 <br><h6 class="small-text italic gray left-align">${place.userRatingCount} ratings</h6></h5>
                                 <h6 class="small-text left-align gray">${(!place.priceLevel || place.priceLevel.charAt(0) === "F" || place.priceLevel.charAt(0) === "I") ? "$" : (place.priceLevel.charAt(0) === "M") ? "$$" : "$$$"} · ${place.priceLevel ? place.priceLevel.toLowerCase() : "no price data"}</h6>
+                                <h6 class="small-text left-align gray">${place.adrFormatAddress.split(", ")[0] + ", Atlanta GA"}</h6>
 </div>
 <div class="s1 m4 l6 right-align">
                                 <button class="round">View in Map</button>

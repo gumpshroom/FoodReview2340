@@ -23,29 +23,6 @@
             --pink1: #ff69b4; /* Replace with your desired pink color */
         }
 
-        .top {
-            background-color: var(--pink1); /* Use BeerCSS pink color */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-        }
-
-        .top a {
-            color: black; /* Change the color to match your theme */
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        .max {
-            margin: 0;
-            font-size: 20px; /* Adjust the font size as needed */
-        }
-
-        .center-align {
-            text-align: center;
-            flex: 1; /* Take up the remaining space */
-        }
 
         #map {
             height: 600px;
@@ -62,134 +39,162 @@
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtYu97MeZ3EBsEGiHCg6UYPg-6e0p0JrQ&libraries=places"></script>
-    <script>
-        let map;
-        let service;
-        let currentInfoWindow = null;
-        let markers = [];
-        let pagination = null; // To track pagination
+</head>
+<body onload="initMap()" class="light">
+<script>
+    let map;
+let service;
+let currentInfoWindow = null;
+let markers = [];
+let pagination = null; // To track pagination
 
-        function initMap() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                        const userLocation = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                        };
 
-                        map = new google.maps.Map(document.getElementById('map'), {
-                            center: userLocation,
-                            zoom: 15,
-                        });
+function getDistance(p1, p2) {
+    const R = 6371e3; // metres
+    const ph1 = p1.lat() * Math.PI / 180; // φ, λ in radians
+    const ph2 = p2.lat() * Math.PI / 180;
+    const dph = (p2.lat() - p1.lat()) * Math.PI / 180;
+    const dl = (p2.lng() - p1.lng()) * Math.PI / 180;
 
-                        service = new google.maps.places.PlacesService(map);
-                        performSearch(1000);
+    const a = Math.sin(dph / 2) * Math.sin(dph / 2) +
+        Math.cos(ph1) * Math.cos(ph2) *
+        Math.sin(dl / 2) * Math.sin(dl / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-                        new google.maps.Marker({
-                            position: userLocation,
-                            map: map,
-                            title: "You are here",
-                            icon: {
-                                url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                            }
-                        });
-                    },
-                    function () {
-                        handleLocationError(true, map.getCenter());
+    return R * c; // in metres
+}
+
+function initMap() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: userLocation,
+                    zoom: 15,
+                });
+
+                map.addListener("idle", () => {
+
+                    var boundsDistance = getDistance(map.getBounds().getNorthEast(), map.getBounds().getSouthWest());
+                    console.log(boundsDistance);
+                    performSearch(boundsDistance, map.getCenter());
+                    if (pagination) {
+                        pagination.nextPage();
                     }
-                );
-            } else {
-                handleLocationError(false, map.getCenter());
+                });
+
+                service = new google.maps.places.PlacesService(map);
+                performSearch(1000);
+
+                new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    title: "You are here",
+                    icon: {
+                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                    }
+                });
+            },
+            function () {
+                handleLocationError(true);
             }
-        }
+        );
+    } else {
+        handleLocationError();
+    }
+}
 
-        function handleLocationError(browserHasGeolocation, pos) {
-            alert(
-                browserHasGeolocation
-                    ? "Error: The Geolocation service failed."
-                    : "Error: Your browser doesn't support geolocation."
-            );
-        }
+function handleLocationError(browserHasGeolocation, pos) {
+    alert(
+        browserHasGeolocation
+            ? "Error: You denied permission for geolocation."
+            : "Error: Your browser doesn't support geolocation."
+    );
+}
 
-        function performSearch(radius) {
-            const userLocation = map.getCenter();
-            const request = {
-                location: userLocation,
-                radius: radius,
-                type: ['restaurant'],
-                fields: ['place_id', 'name', 'vicinity', 'rating']
-            };
+function performSearch(radius, center) {
 
-            clearMarkers();
+    const request = {
+        location: center,
+        radius: radius,
+        type: ['restaurant'],
+        fields: ['place_id', 'name', 'vicinity', 'rating']
+    };
 
-            service.nearbySearch(request, (results, status, pag) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    results.forEach(place => {
-                        const marker = new google.maps.Marker({
-                            map: map,
-                            position: place.geometry.location,
-                            title: place.name,
-                        });
+    clearMarkers();
 
-                        markers.push(marker);
-                        getPlaceDetails(place.place_id, marker);
-                    });
-                    if (pag.hasNextPage) {
-                        pagination = pag;
-                        setTimeout(() => pagination.nextPage(), 100); // timeout to handle errors if any
-                    } else {
-                        pagination = null; // No more pages available
-                    }
-                    map.addListener('click', () => {
-                        if (currentInfoWindow) {
-                            currentInfoWindow.close();
-                            currentInfoWindow = null;
-                        }
-                    });
+    service.nearbySearch(request, (results, status, pag) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            results.forEach(place => {
+                const marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location,
+                    title: place.name,
+                });
+
+                markers.push(marker);
+                getPlaceDetails(place.place_id, marker);
+            });
+            if (pag.hasNextPage) {
+                pagination = pag;
+                setTimeout(() => pagination.nextPage(), 100); // timeout to handle errors if any
+            } else {
+                pagination = null; // No more pages available
+            }
+            map.addListener('click', () => {
+                if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                    currentInfoWindow = null;
                 }
             });
         }
+    });
+}
 
-        function clearMarkers() {
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-        }
+function clearMarkers() {
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+}
 
-        function getPlaceDetails(placeId, marker) {
-            const request = {
-                placeId: placeId,
-                fields: ['name', 'vicinity', 'rating', 'place_id', 'user_ratings_total', 'editorial_summary', 'photos', 'international_phone_number', "website", "types"]
-            };
-            service.getDetails(request, (place, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    function getCuisineFromNameOrDescription(place) {
-                        const keywords = /(fast food|american|chinese|italian|mexican|indian|japanese|korean|thai|mediterranean|snack)/i;
+function getPlaceDetails(placeId, marker) {
+    const request = {
+        placeId: placeId,
+        fields: ['name', 'vicinity', 'rating', 'place_id', 'user_ratings_total', 'editorial_summary', 'photos', 'international_phone_number', "website", "types"]
+    };
+    service.getDetails(request, (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            function getCuisineFromNameOrDescription(place) {
+                const keywords = /(fast food|american|chinese|italian|mexican|indian|japanese|korean|thai|mediterranean|snack)/i;
 
-                        // Check in place name
-                        if (keywords.test(place.name)) {
-                            return place.name.match(keywords)[0];  // Return the matched cuisine type
-                        }
+                // Check in place name
+                if (keywords.test(place.name)) {
+                    return place.name.match(keywords)[0];  // Return the matched cuisine type
+                }
 
-                        // Check in editorial summary (description) if available
-                        if (place.editorial_summary && keywords.test(place.editorial_summary.overview)) {
-                            return place.editorial_summary.overview.match(keywords)[0];  // Return the matched cuisine type
-                        }
+                // Check in editorial summary (description) if available
+                if (place.editorial_summary && keywords.test(place.editorial_summary.overview)) {
+                    return place.editorial_summary.overview.match(keywords)[0];  // Return the matched cuisine type
+                }
 
-                        return 'Cuisine type not available';  // Fallback if no match is found
-                    }
+                return 'Cuisine type not available';  // Fallback if no match is found
+            }
 
-                    let photoUrl = '';
-                    if (place.photos && place.photos.length > 0) {
-                        photoUrl = place.photos[0].getUrl({maxWidth: 300, maxHeight: 300});
-                    }
+            let photoUrl = '';
+            if (place.photos && place.photos.length > 0) {
+                photoUrl = place.photos[0].getUrl({maxWidth: 300, maxHeight: 300});
+            }
 
-                    const cuisineType = getCuisineFromNameOrDescription(place);
-                    const phoneNumber = place.international_phone_number || 'No phone number available';
-                    const website = place.website || 'No website available';
-                    const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
+            const cuisineType = getCuisineFromNameOrDescription(place);
+            const phoneNumber = place.international_phone_number || 'No phone number available';
+            const website = place.website || 'No website available';
+            const description = place.editorial_summary ? place.editorial_summary.overview : 'No description available';
 
-                    const infoWindowContent = `
+            const infoWindowContent = `
                         <div>
                             {% if user.is_authenticated %}
 
@@ -221,102 +226,106 @@
                         </div>
                     `;
 
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: infoWindowContent
-                    });
+            const infoWindow = new google.maps.InfoWindow({
+                content: infoWindowContent
+            });
 
-                    marker.addListener('click', () => {
-                        if (currentInfoWindow) {
-                            currentInfoWindow.close();
-                        }
-                        infoWindow.open(map, marker);
-                        currentInfoWindow = infoWindow;
-                    });
+            marker.addListener('click', () => {
+                if (currentInfoWindow) {
+                    currentInfoWindow.close();
                 }
+                infoWindow.open(map, marker);
+                currentInfoWindow = infoWindow;
             });
         }
+    });
+}
 
-        function updateRadius() {
-            const newRadius = document.getElementById('radius').value;
-            if (newRadius) {
-                performSearch(parseInt(newRadius) * 1000);
+function updateRadius() {
+    const newRadius = document.getElementById('radius').value;
+    if (newRadius) {
+        performSearch(parseInt(newRadius) * 1000);
+    }
+}
+
+function addToFavorites(place_id, name, rating, address) {
+    console.log('Adding to favorites:', place_id, name, rating);
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('/users/addFavorites/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            'place_id': place_id,
+            'name': name,
+            'address': address,
+            'rating': rating,
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${name} has been added to your favorites!`);
+            } else {
+                alert(`${name} is already in your favorites.`);
             }
-        }
+        })
+        .catch(error => {
+            alert('An error occurred while adding to favorites. Please try again.');
+        });
+}
 
-        function addToFavorites(place_id, name, rating, address) {
-            console.log('Adding to favorites:', place_id, name, rating);
+function removeFromFavorites(place_id, name) {
+    console.log('Removing from favorites:', place_id);
 
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            fetch('/users/addFavorites/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    'place_id': place_id,
-                    'name': name,
-                    'address': address,
-                    'rating': rating,
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`${name} has been added to your favorites!`);
-                    } else {
-                        alert(`${name} is already in your favorites.`);
-                    }
-                })
-                .catch(error => {
-                    alert('An error occurred while adding to favorites. Please try again.');
-                });
-        }
+    fetch('/users/removeFavorites/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            'place_id': place_id
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${name} has been removed from your favorites!`);
+                location.reload();
+            } else if (data.message === 'Favorite not found.') {
+                alert(`${name} is not in your favorites.`);
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .catch(error => {
+            alert('An error occurred while removing from favorites. Please try again.');
+        });
+}
 
-        function removeFromFavorites(place_id, name) {
-            console.log('Removing from favorites:', place_id);
-
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-            fetch('/users/removeFavorites/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    'place_id': place_id
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`${name} has been removed from your favorites!`);
-                        location.reload();
-                    } else if (data.message === 'Favorite not found.') {
-                        alert(`${name} is not in your favorites.`);
-                    } else {
-                        alert('An error occurred. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    alert('An error occurred while removing from favorites. Please try again.');
-                });
-        }
-    </script>
-</head>
-<body onload="initMap()">
-
+</script>
 <nav class="top pink2">
     <a href="/foodFind/">
         <i>Search</i>
         <div>Search</div>
     </a>
+{% if user.is_authenticated %}
+    <a disabled="true" style="visibility:hidden">
+        <i></i>
+        <div></div>
+    </a>
+{% endif %}
     <h5 class="max center-align">Restaurants in Atlanta</h5>
 
     {% if user.is_authenticated %}
-        <div class="top-right">
+
             <a href="/users/favorites/">
                 <i>star</i>
                 <div>Favorites</div>
@@ -325,14 +334,14 @@
                 <i>logout</i>
                 <div>Logout</div>
             </a>
-        </div>
+
     {% else %}
-        <div class="top-right">
+
             <a href="/users/login/">
                 <i>login</i>
                 <div>Login</div>
             </a>
-        </div>
+
     {% endif %}
 </nav>
 
@@ -347,7 +356,7 @@
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
 <!-- Map container -->
-<div id="map"></div>
+<main id="map"></main>
 
 <!-- Input field for radius -->
 <label for="radius" class="white-text">Radius (km):</label>
