@@ -93,7 +93,13 @@ function addToFavorites(place_id, name, rating, address) {
             alert('An error occurred while adding to favorites. Please try again.');
         });
 }
+let selectedPriceLevel = null;
 
+// Function to update selected price level
+function filterByPrice(priceLevel) {
+    selectedPriceLevel = priceLevel;  // Set the selected price level
+    submitSearch();
+}
 async function submitSearch() {
     //get custom filters and stuff
     const {Place} = await google.maps.importLibrary("places");
@@ -101,7 +107,7 @@ async function submitSearch() {
     var query = document.getElementById('searchInput').value.trim()
     const request = {
         textQuery: query,
-        fields: ["displayName", "primaryTypeDisplayName", "location", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "reviews"],
+        fields: ["displayName", "primaryTypeDisplayName", "adrFormatAddress", "editorialSummary", "photos", "priceLevel", "rating", "userRatingCount", "reviews"],
         includedType: "restaurant",
         locationBias: {lat: 33.74969690485657, lng: -84.39235565742148},
         isOpenNow: true,
@@ -111,13 +117,20 @@ async function submitSearch() {
         region: "us",
         useStrictTypeFiltering: false,
     };
-
+    if (selectedPriceLevel !== null) {
+        request.priceLevel = selectedPriceLevel;
+    }
     const {places} = await Place.searchByText(request);
     if (places.length) {
         console.log(places)
         document.getElementById('results').innerHTML = ""
-
-        places.forEach(async (place) => {
+    var sorted = Array.from(places);
+    sorted.sort();
+    renderResults(places);
+    }
+}
+function renderResults(places) {
+            places.forEach(async (place) => {
             console.log(place.displayName)
 
             const safeDisplayName = place.displayName.replace(/'/g, "\\'");
@@ -178,11 +191,12 @@ async function submitSearch() {
                             <h5 class="left-align">${place.rating} stars
                                 <br><h6 class="small-text italic gray left-align">${place.userRatingCount} ratings</h6></h5>
                                 <h6 class="small-text left-align gray">${(!place.priceLevel || place.priceLevel.charAt(0) === "F" || place.priceLevel.charAt(0) === "I") ? "$" : (place.priceLevel.charAt(0) === "M") ? "$$" : "$$$"} · ${place.priceLevel ? place.priceLevel.toLowerCase() : "no price data"}</h6>
+                                <h6 class="small-text left-align gray">${place.adrFormatAddress.split(", ")[0] + ", Atlanta GA"}</h6>
 </div>
 <div class="s1 m4 l6 right-align">
-                                <button class="round">View in Map</button>
+                                <button class="round" onclick="viewInMap('${place.id}')">View in Map</button>
                                 <br><br>
-                                <button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>
+                                ${isAuthenticated ? `<button class="border round" onclick="addToFavorites('${place.id}', '${safeDisplayName}', '${place.rating}', '${place.vicinity}')">Add to Favorites</button>` : ''}
                             </div>
                             <hr>
                             <div class="s1 m12 l12">
@@ -223,5 +237,9 @@ async function submitSearch() {
             });
 
         });
-    }
+
+}
+function viewInMap(place_id) {
+    // Redirect to the map page with the place_id as a query parameter
+    window.location.href = `/foodFind/map/?place_id=${place_id}`;
 }

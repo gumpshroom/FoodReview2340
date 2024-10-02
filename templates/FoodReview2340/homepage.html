@@ -45,9 +45,16 @@
         <i>map</i>
         <div>Map</div>
     </a>
+{% if user.is_authenticated %}
+    <a disabled="true" style="visibility:hidden">
+        <i></i>
+        <div></div>
+    </a>
+{% endif %}
     <h5 class="max center-align">Atlanta Food Finder</h5>
 
     {% if user.is_authenticated %}
+
         <a href="/users/favorites/">
             <i>star</i>
             <div>Favorites</div>
@@ -108,11 +115,11 @@
                 <div class="s12 m6 l6">
                     <div class="grid">
 
-                        <div class="s12 m6 l8">
+                        <div id = "priceFilters" class="s12 m6 l8">
                             <nav class="no-space center-align middle-align">
-                                <button class="border left-round max"><span>$</span></button>
-                                <button class="border no-round max"><span>$$</span></button>
-                                <button class="border right-round max"><span>$$$</span></button>
+                                <button onclick = "filterByPrice(1)" class="border left-round max"><span>$</span></button>
+                                <button onclick = "filterByPrice(2)" class="border no-round max"><span>$$</span></button>
+                                <button onclick = "filterByPrice(3)" class="border right-round max"><span>$$$</span></button>
                             </nav>
                         </div>
                         <div class="s12 m6 l3">
@@ -167,6 +174,8 @@
         // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
         // Add other bootstrap parameters as needed, using camel case.
     });
+
+    var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
 </script>
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <script src="{% static 'js/anime.min.js' %}"></script>
