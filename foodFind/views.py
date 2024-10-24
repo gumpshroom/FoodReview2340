@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from groq import Groq
 
 # this should be an env variable but whatever
-GROQ_KEY = "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"
+GROQ_KEY = "keyhere"
 client = Groq(
     api_key=GROQ_KEY,
 )
